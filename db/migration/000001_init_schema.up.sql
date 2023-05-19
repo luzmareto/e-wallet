@@ -4,7 +4,7 @@ CREATE TABLE "users" (
   "password" VARCHAR(255) NOT NULL,
   "email" VARCHAR(255) NOT NULL,
   "phone_number" VARCHAR(20) NOT NULL,
-  "registration_date" DATE NOT NULL DEFAULT 'NOW()'
+  "registration_date" TIMESTAMPTZ NOT NULL DEFAULT 'NOW()'
 );
 
 CREATE TABLE "wallets" (
@@ -19,7 +19,7 @@ CREATE TABLE "transactions" (
   "user_id" INT,
   "wallet_id" INT,
   "amount" DECIMAL(10,2) NOT NULL,
-  "transaction_date" DATE NOT NULL DEFAULT 'NOW()',
+  "transaction_date" TIMESTAMPTZ NOT NULL DEFAULT 'NOW()',
   "description" VARCHAR(255)
 );
 
@@ -28,7 +28,7 @@ CREATE TABLE "transfers" (
   "from_wallet_id" INT,
   "to_wallet_id" INT,
   "amount" DECIMAL(10,2) NOT NULL,
-  "transfer_date" DATE NOT NULL DEFAULT 'NOW()',
+  "transfer_date" TIMESTAMPTZ NOT NULL DEFAULT 'NOW()',
   "description" VARCHAR(255)
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE "topups" (
   "user_id" INT,
   "wallet_id" INT,
   "amount" DECIMAL(10,2) NOT NULL,
-  "topup_date" DATE NOT NULL DEFAULT 'NOW()',
+  "topup_date" TIMESTAMPTZ NOT NULL DEFAULT 'NOW()',
   "description" VARCHAR(255)
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE "withdrawals" (
   "user_id" INT,
   "wallet_id" INT,
   "amount" DECIMAL(10,2) NOT NULL,
-  "withdrawal_date" DATE NOT NULL DEFAULT 'NOW()',
+  "withdrawal_date" TIMESTAMPTZ NOT NULL DEFAULT 'NOW()',
   "description" VARCHAR(255)
 );
 
