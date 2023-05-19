@@ -9,6 +9,9 @@ execdb :
 createdb :
 	docker exec -it postgres-ewallet createdb --username=root --owner=root ewallet
 
+dropdb :
+	docker exec -it postgres-ewallet dropdb ewallet
+
 rundb :
 	docker start postgres-ewallet
 
