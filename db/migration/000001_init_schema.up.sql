@@ -58,7 +58,7 @@ CREATE TABLE "merchants" (
     "address" VARCHAR(255)
 );
 
-CREATE TABLE "Transaction_Merchants" (
+CREATE TABLE "transaction_merchants" (
     "transaction_id" INT,
     "merchant_id" INT
 );
@@ -81,6 +81,6 @@ ALTER TABLE "withdrawals" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "withdrawals" ADD FOREIGN KEY ("wallet_id") REFERENCES "wallets" ("id");
 
-ALTER TABLE "Transaction_Merchants" ADD FOREIGN KEY ("transaction_id") REFERENCES "transactions" ("id");
+ALTER TABLE "transaction_merchants" ADD FOREIGN KEY ("transaction_id") REFERENCES "transactions" ("id");
 
-ALTER TABLE "Transaction_Merchants" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchants" ("id");
+ALTER TABLE "transaction_merchants" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchants" ("id");
