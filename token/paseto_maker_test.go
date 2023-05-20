@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 	"github.com/stretchr/testify/require"
+
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 func TestPasetoMaker(t *testing.T) {
