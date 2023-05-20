@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS "Transaction_Merchants";
+DROP TABLE IF EXISTS "transaction_merchants";
 DROP TABLE IF EXISTS "merchants";
 DROP TABLE IF EXISTS "withdrawals";
 DROP TABLE IF EXISTS "topups";
