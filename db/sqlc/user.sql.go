@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"time"
 )
 
 const createUsers = `-- name: CreateUsers :one
@@ -15,19 +14,17 @@ INSERT INTO users (
     username,
     password,
     email,
-    phone_number,
-    registration_date
+    phone_number
 ) VALUES (
-    $1,$2,$3,$4,$5
+    $1,$2,$3,$4
 ) RETURNINg id, username, password, email, phone_number, registration_date
 `
 
 type CreateUsersParams struct {
-	Username         string    `json:"username"`
-	Password         string    `json:"password"`
-	Email            string    `json:"email"`
-	PhoneNumber      string    `json:"phone_number"`
-	RegistrationDate time.Time `json:"registration_date"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
 }
 
 func (q *Queries) CreateUsers(ctx context.Context, arg CreateUsersParams) (User, error) {
@@ -36,7 +33,6 @@ func (q *Queries) CreateUsers(ctx context.Context, arg CreateUsersParams) (User,
 		arg.Password,
 		arg.Email,
 		arg.PhoneNumber,
-		arg.RegistrationDate,
 	)
 	var i User
 	err := row.Scan(
@@ -54,7 +50,7 @@ const deleteUsers = `-- name: DeleteUsers :exec
 DELETE FROM users WHERE id = $1
 `
 
-func (q *Queries) DeleteUsers(ctx context.Context, id int32) error {
+func (q *Queries) DeleteUsers(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, deleteUsers, id)
 	return err
 }
@@ -63,7 +59,7 @@ const getUserById = `-- name: GetUserById :one
 SELECT id, username, password, email, phone_number, registration_date FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id int32) (User, error) {
+func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i User
 	err := row.Scan(
@@ -139,7 +135,7 @@ UPDATE users SET email = $2, phone_number = $3 WHERE id = $1 RETURNINg id, usern
 `
 
 type UpdateUsersParams struct {
-	ID          int32  `json:"id"`
+	ID          int64  `json:"id"`
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phone_number"`
 }
@@ -163,7 +159,7 @@ UPDATE users SET password = $2 WHERE id = $1
 `
 
 type UpdateUsersPasswordParams struct {
-	ID       int32  `json:"id"`
+	ID       int64  `json:"id"`
 	Password string `json:"password"`
 }
 

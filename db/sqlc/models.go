@@ -7,18 +7,31 @@ package db
 import (
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Merchant struct {
-	ID           int32          `json:"id"`
+	ID           int64          `json:"id"`
 	MerchantName string         `json:"merchant_name"`
 	Description  sql.NullString `json:"description"`
 	Website      sql.NullString `json:"website"`
 	Address      sql.NullString `json:"address"`
 }
 
+type Session struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiredAt    time.Time `json:"expired_at"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
 type Topup struct {
-	ID          int32          `json:"id"`
+	ID          int64          `json:"id"`
 	UserID      sql.NullInt32  `json:"user_id"`
 	WalletID    sql.NullInt32  `json:"wallet_id"`
 	Amount      string         `json:"amount"`
@@ -27,7 +40,7 @@ type Topup struct {
 }
 
 type Transaction struct {
-	ID              int32          `json:"id"`
+	ID              int64          `json:"id"`
 	UserID          sql.NullInt32  `json:"user_id"`
 	WalletID        sql.NullInt32  `json:"wallet_id"`
 	Amount          string         `json:"amount"`
@@ -41,7 +54,7 @@ type TransactionMerchant struct {
 }
 
 type Transfer struct {
-	ID           int32          `json:"id"`
+	ID           int64          `json:"id"`
 	FromWalletID sql.NullInt32  `json:"from_wallet_id"`
 	ToWalletID   sql.NullInt32  `json:"to_wallet_id"`
 	Amount       string         `json:"amount"`
@@ -50,7 +63,7 @@ type Transfer struct {
 }
 
 type User struct {
-	ID               int32     `json:"id"`
+	ID               int64     `json:"id"`
 	Username         string    `json:"username"`
 	Password         string    `json:"password"`
 	Email            string    `json:"email"`
@@ -59,14 +72,14 @@ type User struct {
 }
 
 type Wallet struct {
-	ID       int32         `json:"id"`
+	ID       int64         `json:"id"`
 	UserID   sql.NullInt32 `json:"user_id"`
 	Balance  string        `json:"balance"`
 	Currency string        `json:"currency"`
 }
 
 type Withdrawal struct {
-	WithdrawalID   int32          `json:"withdrawal_id"`
+	ID             int64          `json:"id"`
 	UserID         sql.NullInt32  `json:"user_id"`
 	WalletID       sql.NullInt32  `json:"wallet_id"`
 	Amount         string         `json:"amount"`
