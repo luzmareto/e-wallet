@@ -5,11 +5,15 @@ import (
 )
 
 type Handler struct {
+	AuthHandler AuthHandler
 	UserHandler UserHandler
 }
 
-func New(userHandler UserHandler) *Handler {
-	return &Handler{UserHandler: userHandler}
+func New(authHandler AuthHandler, userHandler UserHandler) *Handler {
+	return &Handler{
+		AuthHandler: authHandler,
+		UserHandler: userHandler,
+	}
 }
 
 type webResponse struct {
@@ -72,5 +76,13 @@ func responseCreated(message string, data interface{}) (int, webResponse) {
 		Status:  "Created",
 		Message: message,
 		Data:    data,
+	}
+}
+
+func responseUnauthorized(message string) (int, webResponse) {
+	return http.StatusUnauthorized, webResponse{
+		Code:    http.StatusUnauthorized,
+		Status:  "Unauthorized",
+		Message: message,
 	}
 }
