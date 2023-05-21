@@ -3,10 +3,9 @@ INSERT INTO users (
     username,
     password,
     email,
-    phone_number,
-    registration_date
+    phone_number
 ) VALUES (
-    $1,$2,$3,$4,$5
+    $1,$2,$3,$4
 ) RETURNINg *;
 
 -- name: DeleteUsers :exec
