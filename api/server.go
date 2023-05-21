@@ -8,6 +8,7 @@ import (
 
 	dbConn "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/handler"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/middleware"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/token"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
@@ -21,7 +22,7 @@ type Server struct {
 }
 
 func NewServer(config utils.Config) (*Server, error) {
-	tokenMaker, err := token.NewPasetoMaker(config.TokenSymetricKey)
+	tokenMaker, err := token.NewJWTMaker(config.TokenSymetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %v", err)
 	}
@@ -37,26 +38,39 @@ func NewServer(config utils.Config) (*Server, error) {
 }
 
 func (server *Server) setupRouter() {
-	router := gin.Default()
 
+	dbconn := dbConn.Connect(server.config)
+	svc := service.New(dbconn)
+
+	// initialte handler
+	userHander := handler.NewUserHandler(svc)
+	authHander := handler.NewAUthHandler(server.config, server.tokenMaker, svc)
+
+	// initiaate main handler
+	h := handler.New(
+		authHander,
+		userHander,
+	)
+
+	// init router
+	router := gin.Default()
 	router.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Hello I am okay",
 		})
 	})
-	dbconn := dbConn.Connect(server.config)
-	svc := service.New(dbconn)
 
-	userHander := handler.NewUserHandler(svc)
-	h := handler.New(userHander)
+	router.POST("/users", h.UserHandler.Register)
+	router.POST("/users/login", h.AuthHandler.LoginUser)
+	router.POST("/token/renew", h.AuthHandler.RenewAccessToken)
 
-	userr := router.Group("/api/v1/users")
+	// user router
+	user := router.Group("/api/v1/users", middleware.AuthMiddleware(server.tokenMaker))
 	{
-		userr.GET("/", h.UserHandler.List)
-		userr.GET("/:id", h.UserHandler.GetByID)
-		userr.GET("/username/:username", h.UserHandler.GetByUsername)
-		userr.POST("/", h.UserHandler.Register)
-		userr.PATCH("/", h.UserHandler.Update)
+		user.GET("/", h.UserHandler.List)
+		user.GET("/:id", h.UserHandler.GetByID)
+		user.GET("/username/:username", h.UserHandler.GetByUsername)
+		user.PATCH("/", h.UserHandler.Update)
 	}
 
 	server.router = router
