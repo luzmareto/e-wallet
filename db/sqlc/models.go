@@ -79,10 +79,10 @@ type Wallet struct {
 }
 
 type Withdrawal struct {
-	ID             int64          `json:"id"`
-	UserID         int32          `json:"user_id"`
-	WalletID       int32          `json:"wallet_id"`
-	Amount         float64        `json:"amount"`
-	WithdrawalDate time.Time      `json:"withdrawal_date"`
-	Description    sql.NullString `json:"description"`
+	ID             int64     `json:"id"`
+	UserID         int32     `json:"user_id"`
+	WalletID       int32     `json:"wallet_id"`
+	Amount         float64   `json:"amount"`
+	WithdrawalDate time.Time `json:"withdrawal_date"`
+	Description    string    `json:"description"`
 }

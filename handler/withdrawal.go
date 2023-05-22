@@ -6,44 +6,43 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TopUpHandler interface {
-	CreateTopUp(ctx *gin.Context)
+type WithdrawalHandler interface {
+	CreateWithdrawal(ctx *gin.Context)
 }
 
-type topUpHandler struct {
+type withdrawalHandler struct {
 	service service.Service
 }
 
-func NewTopUpHandler(service service.Service) TopUpHandler {
-	return &topUpHandler{service: service}
+func NewWithdrawalHandler(service service.Service) WithdrawalHandler {
+	return &withdrawalHandler{service: service}
 }
 
-type CreateTopUpsRequest struct {
+type createwithdrawalsRequest struct {
 	UserID      int32   `json:"user_id"`
 	WalletID    int32   `json:"wallet_id"`
 	Amount      float64 `json:"amount"`
 	Description string  `json:"description"`
 }
 
-func (h *topUpHandler) CreateTopUp(ctx *gin.Context) {
-	var req CreateTopUpsRequest
+// Register implements UserHandler.
+func (h *withdrawalHandler) CreateWithdrawal(ctx *gin.Context) {
+	var req createwithdrawalsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
-
-	arg := db.CreateTopUpsParams{
+	arg := db.CreatewithdrawalsParams{
 		UserID:      req.UserID,
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
 		Description: req.Description,
 	}
 
-	data, err := h.service.CreateTopUps(ctx, arg)
+	data, err := h.service.Createwithdrawals(ctx, arg)
 	if err != nil {
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
 	ctx.JSON(responseOK("Success", data))
-
 }

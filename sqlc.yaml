@@ -23,3 +23,5 @@ overrides:
     column: "withdrawals.amount"
   - go_type: string
     column: "topups.description"
+  - go_type: string
+    column: "withdrawals.description"
