@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"time"
 )
 
 const createTopUps = `-- name: CreateTopUps :one
@@ -15,20 +14,18 @@ INSERT INTO topups (
     user_id,
     wallet_id,
     amount,
-    topup_date,
     description
 
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4
 ) RETURNINg id, user_id, wallet_id, amount, topup_date, description
 `
 
 type CreateTopUpsParams struct {
-	UserID      int32     `json:"user_id"`
-	WalletID    int32     `json:"wallet_id"`
-	Amount      float64   `json:"amount"`
-	TopupDate   time.Time `json:"topup_date"`
-	Description string    `json:"description"`
+	UserID      int32   `json:"user_id"`
+	WalletID    int32   `json:"wallet_id"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
 }
 
 func (q *Queries) CreateTopUps(ctx context.Context, arg CreateTopUpsParams) (Topup, error) {
@@ -36,7 +33,6 @@ func (q *Queries) CreateTopUps(ctx context.Context, arg CreateTopUpsParams) (Top
 		arg.UserID,
 		arg.WalletID,
 		arg.Amount,
-		arg.TopupDate,
 		arg.Description,
 	)
 	var i Topup

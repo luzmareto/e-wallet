@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"time"
-
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
 	"github.com/gin-gonic/gin"
@@ -26,11 +24,10 @@ func NewTopUpHandler(service service.Service) TopUpHandler {
 }
 
 type CreateTopUpsRequest struct {
-	UserID      int32     `json:"user_id"`
-	WalletID    int32     `json:"wallet_id"`
-	Amount      float64   `json:"amount"`
-	TopupDate   time.Time `json:"topup_date"`
-	Description string    `json:"description"`
+	UserID      int32   `json:"user_id"`
+	WalletID    int32   `json:"wallet_id"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
 }
 
 // CreateWallets implements WalletHandler
@@ -45,7 +42,6 @@ func (h *walletHandler) CreateTopUp(ctx *gin.Context) {
 		UserID:      req.UserID,
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
-		TopupDate:   req.TopupDate,
 		Description: req.Description,
 	}
 
