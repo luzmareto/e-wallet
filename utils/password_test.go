@@ -8,6 +8,11 @@ import (
 )
 
 func TestPassword(t *testing.T) {
+	toLongPassword := RandomString(100)
+	hashpassword, err := HashPassword(toLongPassword)
+	require.Error(t, err)
+	require.Empty(t, hashpassword)
+
 	password := RandomString(8)
 
 	hashedpassword, err := HashPassword(password)
