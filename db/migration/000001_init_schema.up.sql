@@ -44,7 +44,7 @@ CREATE TABLE "topups" (
 CREATE TABLE "withdrawals" (
   "id" BIGSERIAL PRIMARY KEY,
   "user_id" INT NOT NULL,
-  "wallet_id" INT,
+  "wallet_id" INT NOT NULL,
   "amount" NUMERIC(10, 2) NOT NULL,
   "withdrawal_date" timestamptz NOT NULL DEFAULT 'NOW()',
   "description" VARCHAR(255)
