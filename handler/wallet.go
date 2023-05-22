@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"database/sql"
+	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
-	"github.com/gin-gonic/gin"
 )
 
 type WalletHandler interface {
@@ -26,7 +25,7 @@ type walletIdRequest struct {
 }
 
 type addWalletBalanceRequest struct {
-	Balance string `json:"balance"`
+	Balance float64 `json:"balance"`
 }
 
 // AddWalletBalance implements WalletHandler
@@ -57,9 +56,9 @@ func (h *walletHandler) AddWalletBalance(ctx *gin.Context) {
 }
 
 type createWalletsRequest struct {
-	UserID   int32  `json:"user_id" binding:"required,min=1"`
-	Balance  string `json:"balance,omitempty"`
-	Currency string `json:"currency,omitempty"`
+	UserID   int32   `json:"user_id" binding:"required,min=1"`
+	Balance  float64 `json:"balance,omitempty"`
+	Currency string  `json:"currency,omitempty"`
 }
 
 // CreateWallets implements WalletHandler
@@ -71,7 +70,7 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 	}
 
 	arg := db.CreateWalletsParams{
-		UserID:   sql.NullInt32{Int32: req.UserID},
+		UserID:   req.UserID,
 		Balance:  req.Balance,
 		Currency: req.Currency,
 	}

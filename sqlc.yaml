@@ -10,3 +10,14 @@ packages:
     emit_interface: true
     emit_exact_table_names: false
     emit_empty_slices: true
+overrides:
+  - go_type: float64
+    column: "wallets.balance"
+  - go_type: float64
+    column: "transactions.amount"
+  - go_type: float64
+    column: "transfers.amount"
+  - go_type: float64
+    column: "topups.amount"
+  - go_type: float64
+    column: "withdrawals.amount"

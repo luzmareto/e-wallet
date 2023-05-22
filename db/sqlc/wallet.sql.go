@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const addWalletBalance = `-- name: AddWalletBalance :one
@@ -17,8 +16,8 @@ WHERE id = $1 RETURNINg id, user_id, balance, currency
 `
 
 type AddWalletBalanceParams struct {
-	ID      int64  `json:"id"`
-	Balance string `json:"balance"`
+	ID      int64   `json:"id"`
+	Balance float64 `json:"balance"`
 }
 
 func (q *Queries) AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) (Wallet, error) {
@@ -44,9 +43,9 @@ INSERT INTO wallets (
 `
 
 type CreateWalletsParams struct {
-	UserID   sql.NullInt32 `json:"user_id"`
-	Balance  string        `json:"balance"`
-	Currency string        `json:"currency"`
+	UserID   int32   `json:"user_id"`
+	Balance  float64 `json:"balance"`
+	Currency string  `json:"currency"`
 }
 
 func (q *Queries) CreateWallets(ctx context.Context, arg CreateWalletsParams) (Wallet, error) {
