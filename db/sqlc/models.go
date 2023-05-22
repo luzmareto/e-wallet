@@ -32,18 +32,18 @@ type Session struct {
 
 type Topup struct {
 	ID          int64          `json:"id"`
-	UserID      sql.NullInt32  `json:"user_id"`
-	WalletID    sql.NullInt32  `json:"wallet_id"`
-	Amount      string         `json:"amount"`
+	UserID      int32          `json:"user_id"`
+	WalletID    int32          `json:"wallet_id"`
+	Amount      float64        `json:"amount"`
 	TopupDate   time.Time      `json:"topup_date"`
 	Description sql.NullString `json:"description"`
 }
 
 type Transaction struct {
 	ID              int64          `json:"id"`
-	UserID          sql.NullInt32  `json:"user_id"`
-	WalletID        sql.NullInt32  `json:"wallet_id"`
-	Amount          string         `json:"amount"`
+	UserID          int32          `json:"user_id"`
+	WalletID        int32          `json:"wallet_id"`
+	Amount          float64        `json:"amount"`
 	TransactionDate time.Time      `json:"transaction_date"`
 	Description     sql.NullString `json:"description"`
 }
@@ -55,9 +55,9 @@ type TransactionMerchant struct {
 
 type Transfer struct {
 	ID           int64          `json:"id"`
-	FromWalletID sql.NullInt32  `json:"from_wallet_id"`
-	ToWalletID   sql.NullInt32  `json:"to_wallet_id"`
-	Amount       string         `json:"amount"`
+	FromWalletID int32          `json:"from_wallet_id"`
+	ToWalletID   int32          `json:"to_wallet_id"`
+	Amount       float64        `json:"amount"`
 	TransferDate time.Time      `json:"transfer_date"`
 	Description  sql.NullString `json:"description"`
 }
@@ -72,17 +72,17 @@ type User struct {
 }
 
 type Wallet struct {
-	ID       int64         `json:"id"`
-	UserID   sql.NullInt32 `json:"user_id"`
-	Balance  string        `json:"balance"`
-	Currency string        `json:"currency"`
+	ID       int64   `json:"id"`
+	UserID   int32   `json:"user_id"`
+	Balance  float64 `json:"balance"`
+	Currency string  `json:"currency"`
 }
 
 type Withdrawal struct {
 	ID             int64          `json:"id"`
-	UserID         sql.NullInt32  `json:"user_id"`
+	UserID         int32          `json:"user_id"`
 	WalletID       sql.NullInt32  `json:"wallet_id"`
-	Amount         string         `json:"amount"`
+	Amount         float64        `json:"amount"`
 	WithdrawalDate time.Time      `json:"withdrawal_date"`
 	Description    sql.NullString `json:"description"`
 }
