@@ -45,11 +45,13 @@ func (server *Server) setupRouter() {
 	// initialte handler
 	userHander := handler.NewUserHandler(svc)
 	authHander := handler.NewAUthHandler(server.config, server.tokenMaker, svc)
+	walletHandler := handler.NewWalletHandler(svc)
 
 	// initiaate main handler
 	h := handler.New(
 		authHander,
 		userHander,
+		walletHandler,
 	)
 
 	// init router
@@ -71,6 +73,12 @@ func (server *Server) setupRouter() {
 		user.GET("/:id", h.UserHandler.GetByID)
 		user.GET("/username/:username", h.UserHandler.GetByUsername)
 		user.PATCH("/", h.UserHandler.Update)
+	}
+
+	wallet := router.Group("/api/v1/wallets", middleware.AuthMiddleware(server.tokenMaker))
+	{
+		wallet.POST("/:id", h.WalletHandler.AddWalletBalance)
+		wallet.POST("/", h.WalletHandler.CreateWallets)
 	}
 
 	server.router = router
