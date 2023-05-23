@@ -14,11 +14,6 @@ const (
 	CurrencySGD = "SGD"
 )
 
-// AddWalletBalance implements Service
-func (s *service) AddWalletBalance(ctx context.Context, arg db.AddWalletBalanceParams) (db.Wallet, error) {
-	return s.queries.AddWalletBalance(ctx, arg)
-}
-
 // CreateWallets implements Service
 func (s *service) CreateWallets(ctx context.Context, arg db.CreateWalletsParams) (db.Wallet, error) {
 	if _, err := s.queries.GetUserById(ctx, int64(arg.UserID)); err != nil {
@@ -37,4 +32,9 @@ func (s *service) CreateWallets(ctx context.Context, arg db.CreateWalletsParams)
 // GetWalletById implements Service.
 func (s *service) GetWalletById(ctx context.Context, id int64) (db.Wallet, error) {
 	return s.queries.GetWalletById(ctx, id)
+}
+
+// AddWalletBalance implements Service
+func (s *service) AddWalletBalance(ctx context.Context, arg db.AddWalletBalanceParams) (db.Wallet, error) {
+	return s.queries.AddWalletBalance(ctx, arg)
 }
