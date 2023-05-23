@@ -11,18 +11,27 @@ import (
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
-func TestGetUserByUserName(t *testing.T) {
-	user := createUser(t)
-	user1, err := testQueries.GetUserByUserName(context.Background(), user.Username)
+func TestUpdateUsers(t *testing.T) {
+	// Create user
+	users := createUser(t)
+
+	// Update user's email and phone number
+	arg := UpdateUsersParams{
+		ID:          users.ID,
+		Email:       "presiden@gmail.com",
+		PhoneNumber: "0123456",
+	}
+
+	// Call UpdateUsers function
+	updatedUser, err := testQueries.UpdateUsers(context.Background(), arg)
 	require.NoError(t, err)
-	require.NotEmpty(t, user1)
+	require.NotEmpty(t, updatedUser)
 
-	require.Equal(t, user.ID, user1.ID)
-	require.Equal(t, user.Username, user1.Username)
-	require.Equal(t, user.Email, user1.Email)
-	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
-
-	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
+	// Verify the updated user's fields
+	require.Equal(t, arg.ID, updatedUser.ID)
+	require.Equal(t, users.Username, updatedUser.Username)
+	require.Equal(t, arg.Email, updatedUser.Email)
+	require.Equal(t, arg.PhoneNumber, updatedUser.PhoneNumber)
 }
 
 func createUser(t *testing.T) User {
@@ -93,4 +102,18 @@ func TestListUsers(t *testing.T) {
 	for _, user := range users {
 		require.NotEmpty(t, user)
 	}
+}
+
+func TestGetUserByUserName(t *testing.T) {
+	user := createUser(t)
+	user1, err := testQueries.GetUserByUserName(context.Background(), user.Username)
+	require.NoError(t, err)
+	require.NotEmpty(t, user1)
+
+	require.Equal(t, user.ID, user1.ID)
+	require.Equal(t, user.Username, user1.Username)
+	require.Equal(t, user.Email, user1.Email)
+	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
+
+	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
 }
