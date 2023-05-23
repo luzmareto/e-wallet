@@ -40,12 +40,12 @@ type Topup struct {
 }
 
 type Transaction struct {
-	ID              int64          `json:"id"`
-	UserID          int32          `json:"user_id"`
-	WalletID        int32          `json:"wallet_id"`
-	Amount          float64        `json:"amount"`
-	TransactionDate time.Time      `json:"transaction_date"`
-	Description     sql.NullString `json:"description"`
+	ID              int64     `json:"id"`
+	UserID          int32     `json:"user_id"`
+	WalletID        int32     `json:"wallet_id"`
+	Amount          float64   `json:"amount"`
+	TransactionDate time.Time `json:"transaction_date"`
+	Description     string    `json:"description"`
 }
 
 type TransactionMerchant struct {
@@ -54,12 +54,12 @@ type TransactionMerchant struct {
 }
 
 type Transfer struct {
-	ID           int64          `json:"id"`
-	FromWalletID int32          `json:"from_wallet_id"`
-	ToWalletID   int32          `json:"to_wallet_id"`
-	Amount       float64        `json:"amount"`
-	TransferDate time.Time      `json:"transfer_date"`
-	Description  sql.NullString `json:"description"`
+	ID           int64     `json:"id"`
+	FromWalletID int32     `json:"from_wallet_id"`
+	ToWalletID   int32     `json:"to_wallet_id"`
+	Amount       float64   `json:"amount"`
+	TransferDate time.Time `json:"transfer_date"`
+	Description  string    `json:"description"`
 }
 
 type User struct {

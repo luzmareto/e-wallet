@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createTransaction = `-- name: CreateTransaction :exec
@@ -22,10 +21,10 @@ INSERT INTO transactions (
 `
 
 type CreateTransactionParams struct {
-	UserID      int32          `json:"user_id"`
-	WalletID    int32          `json:"wallet_id"`
-	Amount      float64        `json:"amount"`
-	Description sql.NullString `json:"description"`
+	UserID      int32   `json:"user_id"`
+	WalletID    int32   `json:"wallet_id"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) error {

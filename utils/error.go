@@ -19,3 +19,11 @@ func (e *CustomError) Error() string {
 func (e *CustomError) Unwrap() error {
 	return e.Err
 }
+
+func CastError(err error) *CustomError {
+	castErr, ok := err.(*CustomError)
+	if !ok {
+		return castErr
+	}
+	return castErr
+}

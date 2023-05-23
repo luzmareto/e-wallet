@@ -2,12 +2,12 @@ package handler
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 type UserHandler interface {
@@ -43,7 +43,6 @@ func (h *userHandler) List(ctx *gin.Context) {
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	fmt.Println("ARG LIST USER: ", arg)
 	data, err := h.service.ListUsers(ctx, arg)
 	if err != nil {
 		ctx.JSON(responseInternalServerError(err.Error()))
@@ -64,9 +63,11 @@ func (h *userHandler) GetByID(ctx *gin.Context) {
 		return
 	}
 	data, err := h.service.GetUserById(ctx, req.ID)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(fmt.Sprintf("User with ID %d not found", req.ID)))
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))
@@ -87,9 +88,11 @@ func (h *userHandler) GetByUsername(ctx *gin.Context) {
 		return
 	}
 	data, err := h.service.GetUserByUserName(ctx, req.Username)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(fmt.Sprintf("User with Username %s not found", req.Username)))
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))
@@ -147,9 +150,11 @@ func (h *userHandler) Update(ctx *gin.Context) {
 		PhoneNumber: req.PhoneNumber,
 	}
 	data, err := h.service.UpdateUsers(ctx, arg)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(fmt.Sprintf("User with ID %d not found", req.ID)))
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))

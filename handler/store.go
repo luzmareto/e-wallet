@@ -7,6 +7,7 @@ import (
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 type StoreHandler interface {
@@ -44,8 +45,10 @@ func (h *storeHandler) TopupTransactions(ctx *gin.Context) {
 		Description: req.Description,
 	}
 	data, err := h.service.TopupTransactions(ctx, arg)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}
@@ -76,8 +79,10 @@ func (h *storeHandler) WithdrawalTransactions(ctx *gin.Context) {
 		Description: req.Description,
 	}
 	data, err := h.service.WithdrawalTransactions(ctx, arg)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}

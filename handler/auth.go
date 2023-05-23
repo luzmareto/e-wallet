@@ -70,8 +70,10 @@ func (h *authHandler) LoginUser(ctx *gin.Context) {
 	}
 
 	user, err := h.service.GetUserByUserName(ctx, req.Username)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}
@@ -151,8 +153,10 @@ func (h *authHandler) RenewAccessToken(ctx *gin.Context) {
 	}
 
 	session, err := h.service.GetSessions(ctx, refreshPayload.ID)
+	newErr := utils.CastError(err)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
 		}

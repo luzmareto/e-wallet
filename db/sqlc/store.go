@@ -78,12 +78,10 @@ func (store *sqlStore) TopupTransactions(ctx context.Context, arg CreateTopUpsPa
 		}
 
 		err = q.CreateTransaction(ctx, CreateTransactionParams{
-			UserID:   arg.UserID,
-			WalletID: arg.WalletID,
-			Amount:   arg.Amount,
-			Description: sql.NullString{
-				String: arg.Description,
-			},
+			UserID:      arg.UserID,
+			WalletID:    arg.WalletID,
+			Amount:      arg.Amount,
+			Description: arg.Description,
 		})
 		return err
 	})
@@ -124,12 +122,10 @@ func (store *sqlStore) WithdrawalTransactions(ctx context.Context, arg CreateWit
 		}
 
 		err = q.CreateTransaction(ctx, CreateTransactionParams{
-			UserID:   arg.UserID,
-			WalletID: arg.WalletID,
-			Amount:   arg.Amount,
-			Description: sql.NullString{
-				String: arg.Description,
-			},
+			UserID:      arg.UserID,
+			WalletID:    arg.WalletID,
+			Amount:      arg.Amount,
+			Description: arg.Description,
 		})
 		return err
 	})
