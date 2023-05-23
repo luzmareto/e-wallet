@@ -1,4 +1,4 @@
--- name: Createwithdrawals :one
+-- name: CreateWithdrawals :one
 INSERT INTO withdrawals (
     user_id,
     wallet_id,

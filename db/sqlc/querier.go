@@ -14,13 +14,17 @@ type Querier interface {
 	AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) (Wallet, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateTopUps(ctx context.Context, arg CreateTopUpsParams) (Topup, error)
+	CreateTransaction(ctx context.Context, arg CreateTransactionParams) error
 	CreateUsers(ctx context.Context, arg CreateUsersParams) (User, error)
 	CreateWallets(ctx context.Context, arg CreateWalletsParams) (Wallet, error)
-	Createwithdrawals(ctx context.Context, arg CreatewithdrawalsParams) (Withdrawal, error)
+	CreateWithdrawals(ctx context.Context, arg CreateWithdrawalsParams) (Withdrawal, error)
 	DeleteUsers(ctx context.Context, id int64) error
 	GetSessions(ctx context.Context, id uuid.UUID) (Session, error)
+	GetTransactionUserID(ctx context.Context, userID int32) ([]Transaction, error)
+	GetTransactionWalletID(ctx context.Context, walletID int32) ([]Transaction, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByUserName(ctx context.Context, username string) (User, error)
+	GetWalletById(ctx context.Context, id int64) (Wallet, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdateUsers(ctx context.Context, arg UpdateUsersParams) (User, error)
 	UpdateUsersPassword(ctx context.Context, arg UpdateUsersPasswordParams) error

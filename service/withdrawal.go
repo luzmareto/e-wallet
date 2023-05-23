@@ -7,6 +7,6 @@ import (
 )
 
 // Createwithdrawals implements Service
-func (s *service) Createwithdrawals(ctx context.Context, arg db.CreatewithdrawalsParams) (db.Withdrawal, error) {
-	return s.queries.Createwithdrawals(ctx, arg)
+func (s *service) CreateWithdrawals(ctx context.Context, arg db.CreateWithdrawalsParams) (db.Withdrawal, error) {
+	return s.queries.CreateWithdrawals(ctx, arg)
 }

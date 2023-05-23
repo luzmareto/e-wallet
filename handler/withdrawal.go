@@ -33,14 +33,14 @@ func (h *withdrawalHandler) CreateWithdrawal(ctx *gin.Context) {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
-	arg := db.CreatewithdrawalsParams{
+	arg := db.CreateWithdrawalsParams{
 		UserID:      req.UserID,
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
 		Description: req.Description,
 	}
 
-	data, err := h.service.Createwithdrawals(ctx, arg)
+	data, err := h.service.CreateWithdrawals(ctx, arg)
 	if err != nil {
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return

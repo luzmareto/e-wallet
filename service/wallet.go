@@ -24,3 +24,8 @@ func (s *service) CreateWallets(ctx context.Context, arg db.CreateWalletsParams)
 	}
 	return s.queries.CreateWallets(ctx, arg)
 }
+
+// GetWalletById implements Service.
+func (s *service) GetWalletById(ctx context.Context, id int64) (db.Wallet, error) {
+	return s.queries.GetWalletById(ctx, id)
+}

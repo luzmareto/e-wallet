@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
@@ -31,7 +29,6 @@ type CreateTopUpsRequest struct {
 func (h *topUpHandler) CreateTopUp(ctx *gin.Context) {
 	var req CreateTopUpsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		fmt.Println(err.Error())
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}

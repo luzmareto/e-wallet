@@ -7,16 +7,18 @@ import (
 )
 
 type Service interface {
-	db.Querier
+	db.Store
 }
 
 type service struct {
+	store   db.Store
 	queries *db.Queries
 	sqlDB   *sql.DB
 }
 
 func New(sqlDB *sql.DB) Service {
 	return &service{
+		store:   db.NewStore(sqlDB),
 		queries: db.New(sqlDB),
 		sqlDB:   sqlDB,
 	}
