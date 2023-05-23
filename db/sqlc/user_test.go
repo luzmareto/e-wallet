@@ -37,7 +37,9 @@ func TestCreateUser(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	/*
 		ALUR :
-
+			1. Membuat User baru
+			2. Menghapus data dari User baru
+			3. Melakukan pengecekan
 	*/
 
 	user := createUser(t) // membuat user baru
