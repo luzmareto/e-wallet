@@ -11,7 +11,7 @@ import (
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
-func createUser(t *testing.T) User {
+func createRandomUser(t *testing.T) User {
 	ctx := context.Background()
 	hashed, err := utils.HashPassword(utils.RandomString(12))
 	require.NoError(t, err)
@@ -32,11 +32,11 @@ func createUser(t *testing.T) User {
 	return user
 }
 func TestCreateUser(t *testing.T) {
-	createUser(t)
+	createRandomUser(t)
 }
 
 func TestDeleteUser(t *testing.T) {
-	user := createUser(t) // membuat user baru
+	user := createRandomUser(t) // membuat user baru
 
 	err := testQueries.DeleteUsers(context.Background(), user.ID) //menghapus user
 	require.NoError(t, err)
@@ -49,7 +49,7 @@ func TestDeleteUser(t *testing.T) {
 }
 
 func TestGetUserById(t *testing.T) {
-	user := createUser(t)
+	user := createRandomUser(t)
 	user1, err := testQueries.GetUserById(context.Background(), user.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, user1)
@@ -64,7 +64,7 @@ func TestGetUserById(t *testing.T) {
 func TestListUsers(t *testing.T) {
 	n := 5
 	for i := 0; i < n*2; i++ {
-		createUser(t)
+		createRandomUser(t)
 	}
 
 	arg := ListUsersParams{
@@ -82,7 +82,7 @@ func TestListUsers(t *testing.T) {
 }
 
 func TestGetUserByUserName(t *testing.T) {
-	user := createUser(t)
+	user := createRandomUser(t)
 	user1, err := testQueries.GetUserByUserName(context.Background(), user.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user1)
@@ -96,7 +96,7 @@ func TestGetUserByUserName(t *testing.T) {
 }
 
 func TestUpdateUsers(t *testing.T) {
-	users := createUser(t)
+	users := createRandomUser(t)
 
 	arg := UpdateUsersParams{
 		ID:          users.ID,
@@ -115,7 +115,7 @@ func TestUpdateUsers(t *testing.T) {
 }
 
 func TestUpdateUsersPassword(t *testing.T) {
-	user := createUser(t)
+	user := createRandomUser(t)
 
 	hashedPassword, err := utils.HashPassword("newpassword")
 	require.NoError(t, err)
