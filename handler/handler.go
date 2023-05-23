@@ -95,3 +95,8 @@ func responseUnauthorized(message string) (int, webResponse) {
 		Message: message,
 	}
 }
+
+const (
+	ROLE_ADMIN = "admin"
+	ROLE_USER  = "user"
+)

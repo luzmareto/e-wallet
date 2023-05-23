@@ -48,3 +48,13 @@ func AuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		ctx.Next()
 	}
 }
+
+func GetPayload(ctx *gin.Context) (payload *token.Payload, err error) {
+	rawPayload := ctx.Value(authorizationPayloadKey)
+	payload, ok := rawPayload.(*token.Payload)
+	if !ok {
+		err = fmt.Errorf("invalid authorization payload")
+		return
+	}
+	return
+}

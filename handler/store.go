@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/middleware"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
@@ -24,7 +25,7 @@ func NewStoreHandler(service service.Service) StoreHandler {
 }
 
 type topupTransactionsRequest struct {
-	UserID      int32   `json:"user_id" binding:"required"`
+	UserID      int32   `json:"-"`
 	WalletID    int32   `json:"wallet_id" binding:"required,min=1"`
 	Amount      float64 `json:"amount" binding:"min=10000,max=10000000"`
 	Description string  `json:"description"`
@@ -32,6 +33,23 @@ type topupTransactionsRequest struct {
 
 // TopupTransactions implements StoreHandler.
 func (h *storeHandler) TopupTransactions(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	newErr := utils.CastError(err)
+
+	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
 	var req topupTransactionsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
@@ -39,13 +57,13 @@ func (h *storeHandler) TopupTransactions(ctx *gin.Context) {
 	}
 
 	arg := db.CreateTopUpsParams{
-		UserID:      req.UserID,
+		UserID:      int32(user.ID),
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
 		Description: req.Description,
 	}
 	data, err := h.service.TopupTransactions(ctx, arg)
-	newErr := utils.CastError(err)
+	newErr = utils.CastError(err)
 
 	if err != nil {
 		if newErr.Err == sql.ErrNoRows {
@@ -59,7 +77,7 @@ func (h *storeHandler) TopupTransactions(ctx *gin.Context) {
 }
 
 type withdrawalsRequest struct {
-	UserID      int32   `json:"user_id"`
+	UserID      int32   `json:"-"`
 	WalletID    int32   `json:"wallet_id"`
 	Amount      float64 `json:"amount"`
 	Description string  `json:"description"`
@@ -67,23 +85,43 @@ type withdrawalsRequest struct {
 
 // WithdrawalTransactions implements StoreHandler.
 func (h *storeHandler) WithdrawalTransactions(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	newErr := utils.CastError(err)
+
+	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
 	var req withdrawalsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 	arg := db.CreateWithdrawalsParams{
-		UserID:      req.UserID,
+		UserID:      int32(user.ID),
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
 		Description: req.Description,
 	}
 	data, err := h.service.WithdrawalTransactions(ctx, arg)
-	newErr := utils.CastError(err)
+	newErr = utils.CastError(err)
 
 	if err != nil {
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		if newErr.Err.Error() == "unauthorized" {
+			ctx.JSON(responseUnauthorized(newErr.Msg))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))
