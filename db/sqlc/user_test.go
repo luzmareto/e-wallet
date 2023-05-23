@@ -11,19 +11,6 @@ import (
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
-func TestGetUserById(t *testing.T) {
-	user := createUser(t)
-	user1, err := testQueries.GetUserById(context.Background(), user.ID)
-	require.NoError(t, err)
-	require.NotEmpty(t, user1)
-
-	require.Equal(t, user.ID, user1.ID)
-	require.Equal(t, user.Email, user1.Email)
-	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
-
-	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
-}
-
 func createUser(t *testing.T) User {
 	ctx := context.Background()
 	hashed, err := utils.HashPassword(utils.RandomString(12))
@@ -59,4 +46,37 @@ func TestDeleteUser(t *testing.T) {
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
 	require.Empty(t, user1)
+}
+
+func TestGetUserById(t *testing.T) {
+	user := createUser(t)
+	user1, err := testQueries.GetUserById(context.Background(), user.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, user1)
+
+	require.Equal(t, user.ID, user1.ID)
+	require.Equal(t, user.Email, user1.Email)
+	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
+
+	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
+}
+
+func TestListUsers(t *testing.T) {
+	n := 5
+	for i := 0; i < n*2; i++ {
+		createUser(t)
+	}
+
+	arg := ListUsersParams{
+		Limit:  int32(n),
+		Offset: 0,
+	}
+
+	users, err := testQueries.ListUsers(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, users)
+
+	for _, user := range users {
+		require.NotEmpty(t, user)
+	}
 }
