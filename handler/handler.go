@@ -5,16 +5,26 @@ import (
 )
 
 type Handler struct {
-	AuthHandler   AuthHandler
-	UserHandler   UserHandler
-	WalletHandler WalletHandler
+	AuthHandler       AuthHandler
+	UserHandler       UserHandler
+	WalletHandler     WalletHandler
+	TopUpHandler      TopUpHandler
+	WithdrawalHandler WithdrawalHandler
 }
 
-func New(authHandler AuthHandler, userHandler UserHandler, walletHandler WalletHandler) *Handler {
+func New(
+	authHandler AuthHandler,
+	userHandler UserHandler,
+	walletHandler WalletHandler,
+	topUpHandler TopUpHandler,
+	withdrawalHandler WithdrawalHandler,
+) *Handler {
 	return &Handler{
-		AuthHandler:   authHandler,
-		UserHandler:   userHandler,
-		WalletHandler: walletHandler,
+		AuthHandler:       authHandler,
+		UserHandler:       userHandler,
+		WalletHandler:     walletHandler,
+		TopUpHandler:      topUpHandler,
+		WithdrawalHandler: withdrawalHandler,
 	}
 }
 

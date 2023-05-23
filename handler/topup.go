@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
-	"github.com/gin-gonic/gin"
 )
 
 type TopUpHandler interface {
@@ -19,15 +22,16 @@ func NewTopUpHandler(service service.Service) TopUpHandler {
 }
 
 type CreateTopUpsRequest struct {
-	UserID      int32   `json:"user_id"`
-	WalletID    int32   `json:"wallet_id"`
-	Amount      float64 `json:"amount"`
+	UserID      int32   `json:"user_id" binding:"required"`
+	WalletID    int32   `json:"wallet_id" binding:"required,min=1"`
+	Amount      float64 `json:"amount" binding:"min=10000,max=10000000"`
 	Description string  `json:"description"`
 }
 
 func (h *topUpHandler) CreateTopUp(ctx *gin.Context) {
 	var req CreateTopUpsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		fmt.Println(err.Error())
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
