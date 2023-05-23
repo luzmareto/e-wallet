@@ -62,3 +62,25 @@ CREATE TABLE "transaction_merchants" (
   "transaction_id" INT,
   "merchant_id" INT
 );
+
+ALTER TABLE "wallets" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "transactions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "transactions" ADD FOREIGN KEY ("wallet_id") REFERENCES "wallets" ("id");
+
+ALTER TABLE "transfers" ADD FOREIGN KEY ("from_wallet_id") REFERENCES "wallets" ("id");
+
+ALTER TABLE "transfers" ADD FOREIGN KEY ("to_wallet_id") REFERENCES "wallets" ("id");
+
+ALTER TABLE "topups" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "topups" ADD FOREIGN KEY ("wallet_id") REFERENCES "wallets" ("id");
+
+ALTER TABLE "withdrawals" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+
+ALTER TABLE "withdrawals" ADD FOREIGN KEY ("wallet_id") REFERENCES "wallets" ("id");
+
+ALTER TABLE "transaction_merchants" ADD FOREIGN KEY ("transaction_id") REFERENCES "transactions" ("id");
+
+ALTER TABLE "transaction_merchants" ADD FOREIGN KEY ("merchant_id") REFERENCES "merchants" ("id");

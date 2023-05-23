@@ -10,9 +10,7 @@ import (
 )
 
 func createUser(t *testing.T) User {
-
 	ctx := context.Background()
-
 	hashed, err := utils.HashPassword(utils.RandomString(12))
 	require.NoError(t, err)
 	arg := CreateUsersParams{
