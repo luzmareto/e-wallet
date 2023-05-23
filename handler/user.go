@@ -34,6 +34,15 @@ type listUsersRequest struct {
 
 // List implements UserHandler.
 func (h *userHandler) List(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	if payload.Role != ROLE_ADMIN {
+		ctx.JSON(responseUnauthorized("role unauthorized"))
+		return
+	}
 	var req listUsersRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
@@ -58,6 +67,15 @@ type getByIdRequest struct {
 
 // GetByID implements UserHandler.
 func (h *userHandler) GetByID(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	if payload.Role != ROLE_ADMIN {
+		ctx.JSON(responseUnauthorized("role unauthorized"))
+		return
+	}
 	var req getByIdRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
@@ -127,13 +145,29 @@ func (h *userHandler) Register(ctx *gin.Context) {
 }
 
 type updateUserRequest struct {
-	ID          int64  `json:"id" binding:"required,min=1"`
+	ID          int64  `json:"-"`
 	Email       string `json:"email" binding:"required,email"`
 	PhoneNumber string `json:"phone_number" binding:"required,numeric,min=8,max=13"`
 }
 
 // Update implements UserHandler.
 func (h *userHandler) Update(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	newErr := utils.CastError(err)
+
+	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
 
 	var req updateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -142,12 +176,12 @@ func (h *userHandler) Update(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateUsersParams{
-		ID:          req.ID,
+		ID:          user.ID,
 		Email:       req.Email,
 		PhoneNumber: req.PhoneNumber,
 	}
 	data, err := h.service.UpdateUsers(ctx, arg)
-	newErr := utils.CastError(err)
+	newErr = utils.CastError(err)
 
 	if err != nil {
 		if newErr.Err == sql.ErrNoRows {

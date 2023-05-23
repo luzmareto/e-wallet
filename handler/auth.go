@@ -88,6 +88,7 @@ func (h *authHandler) LoginUser(ctx *gin.Context) {
 
 	accessToken, accessPayload, err := h.tokenMaker.CreateToken(
 		req.Username,
+		user.Role,
 		h.config.AccessTokenDuration,
 	)
 	if err != nil {
@@ -96,6 +97,7 @@ func (h *authHandler) LoginUser(ctx *gin.Context) {
 
 	refreshToken, refreshPayload, err := h.tokenMaker.CreateToken(
 		user.Username,
+		user.Role,
 		h.config.RefreshTokenDuration,
 	)
 	if err != nil {
@@ -191,8 +193,8 @@ func (h *authHandler) RenewAccessToken(ctx *gin.Context) {
 
 	accessToken, accessPayload, err := h.tokenMaker.CreateToken(
 		refreshPayload.Username,
+		refreshPayload.Role,
 		h.config.AccessTokenDuration,
-		// h.config.AccessTokenDuration,
 	)
 	if err != nil {
 		ctx.JSON(responseInternalServerError(err.Error()))
