@@ -13,8 +13,10 @@ import (
 type Querier interface {
 	AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) (Wallet, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateTopUps(ctx context.Context, arg CreateTopUpsParams) (Topup, error)
 	CreateUsers(ctx context.Context, arg CreateUsersParams) (User, error)
 	CreateWallets(ctx context.Context, arg CreateWalletsParams) (Wallet, error)
+	Createwithdrawals(ctx context.Context, arg CreatewithdrawalsParams) (Withdrawal, error)
 	DeleteUsers(ctx context.Context, id int64) error
 	GetSessions(ctx context.Context, id uuid.UUID) (Session, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
