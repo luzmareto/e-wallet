@@ -11,29 +11,6 @@ import (
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
-func TestUpdateUsers(t *testing.T) {
-	// Create user
-	users := createUser(t)
-
-	// Update user's email and phone number
-	arg := UpdateUsersParams{
-		ID:          users.ID,
-		Email:       "presiden@gmail.com",
-		PhoneNumber: "0123456",
-	}
-
-	// Call UpdateUsers function
-	updatedUser, err := testQueries.UpdateUsers(context.Background(), arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, updatedUser)
-
-	// Verify the updated user's fields
-	require.Equal(t, arg.ID, updatedUser.ID)
-	require.Equal(t, users.Username, updatedUser.Username)
-	require.Equal(t, arg.Email, updatedUser.Email)
-	require.Equal(t, arg.PhoneNumber, updatedUser.PhoneNumber)
-}
-
 func createUser(t *testing.T) User {
 	ctx := context.Background()
 	hashed, err := utils.HashPassword(utils.RandomString(12))
@@ -116,4 +93,49 @@ func TestGetUserByUserName(t *testing.T) {
 	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
 
 	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
+}
+
+func TestUpdateUsers(t *testing.T) {
+	users := createUser(t)
+
+	arg := UpdateUsersParams{
+		ID:          users.ID,
+		Email:       "presiden@gmail.com",
+		PhoneNumber: "0123456",
+	}
+
+	updatedUser, err := testQueries.UpdateUsers(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedUser)
+
+	require.Equal(t, arg.ID, updatedUser.ID)
+	require.Equal(t, users.Username, updatedUser.Username)
+	require.Equal(t, arg.Email, updatedUser.Email)
+	require.Equal(t, arg.PhoneNumber, updatedUser.PhoneNumber)
+}
+
+func TestUpdateUsersPassword(t *testing.T) {
+	user := createUser(t)
+
+	hashedPassword, err := utils.HashPassword("newpassword")
+	require.NoError(t, err)
+
+	arg := UpdateUsersPasswordParams{
+		ID:       user.ID,
+		Password: hashedPassword,
+	}
+
+	err = testQueries.UpdateUsersPassword(context.Background(), arg)
+	require.NoError(t, err)
+
+	updatedUser, err := testQueries.GetUserById(context.Background(), user.ID)
+	require.NoError(t, err)
+	require.NotNil(t, updatedUser)
+
+	isPasswordMatch := utils.CheckPassword(hashedPassword, updatedUser.Password)
+	require.True(t, true)
+	require.NotEmpty(t, isPasswordMatch)
+
+	err = testQueries.DeleteUsers(context.Background(), user.ID)
+	require.NoError(t, err)
 }
