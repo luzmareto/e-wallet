@@ -11,6 +11,20 @@ import (
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
+func TestGetUserByUserName(t *testing.T) {
+	user := createUser(t)
+	user1, err := testQueries.GetUserByUserName(context.Background(), user.Username)
+	require.NoError(t, err)
+	require.NotEmpty(t, user1)
+
+	require.Equal(t, user.ID, user1.ID)
+	require.Equal(t, user.Username, user1.Username)
+	require.Equal(t, user.Email, user1.Email)
+	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
+
+	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
+}
+
 func createUser(t *testing.T) User {
 	ctx := context.Background()
 	hashed, err := utils.HashPassword(utils.RandomString(12))
