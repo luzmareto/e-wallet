@@ -4,11 +4,25 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
+
+func TestGetUserById(t *testing.T) {
+	user := createUser(t)
+	user1, err := testQueries.GetUserById(context.Background(), user.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, user1)
+
+	require.Equal(t, user.ID, user1.ID)
+	require.Equal(t, user.Email, user1.Email)
+	require.Equal(t, user.PhoneNumber, user1.PhoneNumber)
+
+	require.WithinDuration(t, user.RegistrationDate, user1.RegistrationDate, time.Second)
+}
 
 func createUser(t *testing.T) User {
 	ctx := context.Background()
@@ -35,13 +49,6 @@ func TestCreateUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	/*
-		ALUR :
-			1. Membuat User baru
-			2. Menghapus data dari User baru
-			3. Melakukan pengecekan
-	*/
-
 	user := createUser(t) // membuat user baru
 
 	err := testQueries.DeleteUsers(context.Background(), user.ID) //menghapus user
