@@ -73,7 +73,7 @@ func (server *Server) setupRouter() {
 	{
 		user.GET("/", h.UserHandler.List)
 		user.GET("/:id", h.UserHandler.GetByID)
-		user.GET("/username/:username", h.UserHandler.GetByUsername)
+		user.GET("/username/", h.UserHandler.GetByUsername)
 		user.PATCH("/", h.UserHandler.Update)
 	}
 

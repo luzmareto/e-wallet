@@ -69,6 +69,7 @@ type User struct {
 	Email            string    `json:"email"`
 	PhoneNumber      string    `json:"phone_number"`
 	RegistrationDate time.Time `json:"registration_date"`
+	Role             string    `json:"role"`
 }
 
 type Wallet struct {

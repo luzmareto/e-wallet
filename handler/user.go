@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/middleware"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
@@ -76,18 +77,14 @@ func (h *userHandler) GetByID(ctx *gin.Context) {
 	ctx.JSON(responseOK("Success", data))
 }
 
-type getUserByUsernameRequest struct {
-	Username string `uri:"username" binding:"required"`
-}
-
 // GetByUsername implements UserHandler.
 func (h *userHandler) GetByUsername(ctx *gin.Context) {
-	var req getUserByUsernameRequest
-	if err := ctx.ShouldBindUri(&req); err != nil {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
-	data, err := h.service.GetUserByUserName(ctx, req.Username)
+	data, err := h.service.GetUserByUserName(ctx, payload.Username)
 	newErr := utils.CastError(err)
 
 	if err != nil {
