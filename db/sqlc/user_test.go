@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -31,4 +32,22 @@ func createUser(t *testing.T) User {
 }
 func TestCreateUser(t *testing.T) {
 	createUser(t)
+}
+
+func TestDeleteUser(t *testing.T) {
+	/*
+		ALUR :
+
+	*/
+
+	user := createUser(t) // membuat user baru
+
+	err := testQueries.DeleteUsers(context.Background(), user.ID) //menghapus user
+	require.NoError(t, err)
+
+	user1, err := testQueries.GetUserById(context.Background(), user.ID) //get user dari id
+	//melakukan pengecekan apakah user sudah terhapus atau belum
+	require.Error(t, err)
+	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.Empty(t, user1)
 }
