@@ -6,3 +6,24 @@ func ErrorResponse(err error) gin.H {
 	return gin.H{
 		"error": err.Error()}
 }
+
+type CustomError struct {
+	Msg string
+	Err error
+}
+
+func (e *CustomError) Error() string {
+	return e.Msg
+}
+
+func (e *CustomError) Unwrap() error {
+	return e.Err
+}
+
+func CastError(err error) *CustomError {
+	castErr, ok := err.(*CustomError)
+	if !ok {
+		return castErr
+	}
+	return castErr
+}

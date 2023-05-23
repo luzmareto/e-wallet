@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 type WalletHandler interface {
@@ -76,7 +79,13 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 	}
 
 	data, err := h.service.CreateWallets(ctx, arg)
+	newErr := utils.CastError(err)
+
 	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}

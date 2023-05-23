@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 type WithdrawalHandler interface {
@@ -33,15 +36,21 @@ func (h *withdrawalHandler) CreateWithdrawal(ctx *gin.Context) {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
-	arg := db.CreatewithdrawalsParams{
+	arg := db.CreateWithdrawalsParams{
 		UserID:      req.UserID,
 		WalletID:    req.WalletID,
 		Amount:      req.Amount,
 		Description: req.Description,
 	}
 
-	data, err := h.service.Createwithdrawals(ctx, arg)
+	data, err := h.service.CreateWithdrawals(ctx, arg)
+	newErr := utils.CastError(err)
+
 	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}

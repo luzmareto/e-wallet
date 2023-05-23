@@ -9,7 +9,7 @@ import (
 	"context"
 )
 
-const createwithdrawals = `-- name: Createwithdrawals :one
+const createWithdrawals = `-- name: CreateWithdrawals :one
 INSERT INTO withdrawals (
     user_id,
     wallet_id,
@@ -20,15 +20,15 @@ INSERT INTO withdrawals (
 ) RETURNINg id, user_id, wallet_id, amount, withdrawal_date, description
 `
 
-type CreatewithdrawalsParams struct {
+type CreateWithdrawalsParams struct {
 	UserID      int32   `json:"user_id"`
 	WalletID    int32   `json:"wallet_id"`
 	Amount      float64 `json:"amount"`
 	Description string  `json:"description"`
 }
 
-func (q *Queries) Createwithdrawals(ctx context.Context, arg CreatewithdrawalsParams) (Withdrawal, error) {
-	row := q.db.QueryRowContext(ctx, createwithdrawals,
+func (q *Queries) CreateWithdrawals(ctx context.Context, arg CreateWithdrawalsParams) (Withdrawal, error) {
+	row := q.db.QueryRowContext(ctx, createWithdrawals,
 		arg.UserID,
 		arg.WalletID,
 		arg.Amount,

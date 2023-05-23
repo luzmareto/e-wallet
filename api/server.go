@@ -46,16 +46,14 @@ func (server *Server) setupRouter() {
 	userHander := handler.NewUserHandler(svc)
 	authHander := handler.NewAUthHandler(server.config, server.tokenMaker, svc)
 	walletHandler := handler.NewWalletHandler(svc)
-	withdrawalHandler := handler.NewWithdrawalHandler(svc)
-	topUpHandler := handler.NewTopUpHandler(svc)
+	storeHandler := handler.NewStoreHandler(svc)
 
 	// initiaate main handler
 	h := handler.New(
 		authHander,
 		userHander,
 		walletHandler,
-		topUpHandler,
-		withdrawalHandler,
+		storeHandler,
 	)
 
 	// init router
@@ -84,8 +82,8 @@ func (server *Server) setupRouter() {
 	{
 		wallet.POST("/:id", h.WalletHandler.AddWalletBalance)
 		wallet.POST("/", h.WalletHandler.CreateWallets)
-		wallet.POST("/withdrawal", h.WithdrawalHandler.CreateWithdrawal)
-		wallet.POST("/topups", h.TopUpHandler.CreateTopUp)
+		wallet.POST("/withdrawal", h.StoreHandler.WithdrawalTransactions)
+		wallet.POST("/topups", h.StoreHandler.TopupTransactions)
 	}
 
 	server.router = router
