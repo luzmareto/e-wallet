@@ -52,7 +52,7 @@ func (h *walletHandler) AddWalletBalance(ctx *gin.Context) {
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
-	ctx.JSON(responseCreated("Success Created", data))
+	ctx.JSON(responseOK("Success", data))
 }
 
 type createWalletsRequest struct {
