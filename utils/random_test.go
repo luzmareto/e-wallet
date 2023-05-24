@@ -24,7 +24,7 @@ func TestRandomMoney(t *testing.T) {
 }
 
 func TestRandomCurrency(t *testing.T) {
-	availableCurrencies := []string{"RUB", "USD", "CAD", "EUR"}
+	availableCurrencies := []string{"RUB", "USD", "CAD", "EUR", "IDR"}
 	curency := RandomCurrency()
 
 	require.Equal(t, 3, len(curency))
