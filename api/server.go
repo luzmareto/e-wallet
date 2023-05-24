@@ -15,8 +15,7 @@ import (
 )
 
 type Server struct {
-	config utils.Config
-	// store      db.Store
+	config     utils.Config
 	tokenMaker token.Maker
 	router     *gin.Engine
 }
@@ -28,8 +27,7 @@ func NewServer(config utils.Config) (*Server, error) {
 	}
 
 	server := &Server{
-		config: config,
-		// store:      store,
+		config:     config,
 		tokenMaker: tokenMaker,
 	}
 
@@ -98,8 +96,6 @@ func (server *Server) setupRouter() {
 		merchant.GET("/name", h.MerchantHandler.GetByName)
 		merchant.PATCH("/", h.MerchantHandler.Update)
 	}
-
-	_ = merchant
 
 	server.router = router
 
