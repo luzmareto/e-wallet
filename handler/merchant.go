@@ -16,8 +16,8 @@ type MerchantHandler interface {
 	CreateMerchant(ctx *gin.Context)
 	DeleteMerchant(ctx *gin.Context)
 	GetMerchantById(ctx *gin.Context)
-	ListMerchant(ctx *gin.Context)
 	GetMerchantByUsername(ctx *gin.Context)
+	ListMerchant(ctx *gin.Context)
 	UpdateMerchant(ctx *gin.Context)
 }
 
