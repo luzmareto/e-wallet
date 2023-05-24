@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createMerchants = `-- name: CreateMerchants :one
@@ -22,10 +21,10 @@ INSERT INTO merchants (
 `
 
 type CreateMerchantsParams struct {
-	MerchantName string         `json:"merchant_name"`
-	Description  sql.NullString `json:"description"`
-	Website      sql.NullString `json:"website"`
-	Address      sql.NullString `json:"address"`
+	MerchantName string `json:"merchant_name"`
+	Description  string `json:"description"`
+	Website      string `json:"website"`
+	Address      string `json:"address"`
 }
 
 func (q *Queries) CreateMerchants(ctx context.Context, arg CreateMerchantsParams) (Merchant, error) {
@@ -132,9 +131,9 @@ UPDATE merchants SET description = $2, address = $3 WHERE id = $1 RETURNINg id, 
 `
 
 type UpdatMerchantsParams struct {
-	ID          int64          `json:"id"`
-	Description sql.NullString `json:"description"`
-	Address     sql.NullString `json:"address"`
+	ID          int64  `json:"id"`
+	Description string `json:"description"`
+	Address     string `json:"address"`
 }
 
 func (q *Queries) UpdatMerchants(ctx context.Context, arg UpdatMerchantsParams) (Merchant, error) {

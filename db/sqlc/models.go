@@ -12,11 +12,11 @@ import (
 )
 
 type Merchant struct {
-	ID           int64          `json:"id"`
-	MerchantName string         `json:"merchant_name"`
-	Description  sql.NullString `json:"description"`
-	Website      sql.NullString `json:"website"`
-	Address      sql.NullString `json:"address"`
+	ID           int64  `json:"id"`
+	MerchantName string `json:"merchant_name"`
+	Description  string `json:"description"`
+	Website      string `json:"website"`
+	Address      string `json:"address"`
 }
 
 type Session struct {
