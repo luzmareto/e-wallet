@@ -90,13 +90,15 @@ func (server *Server) setupRouter() {
 
 	merchant := router.Group("/api/v1/merchants", middleware.AuthMiddleware(server.tokenMaker))
 	{
-		merchant.POST("/", h.MerchantHandler.CreateMerchant)
-		merchant.DELETE("/:id", h.MerchantHandler.DeleteMerchant)
-		merchant.GET("/:id", h.MerchantHandler.GetMerchantById)
-		merchant.GET("/detail", h.MerchantHandler.GetMerchantByUsername)
-		merchant.GET("/:list", h.MerchantHandler.ListMerchant)
-		merchant.PUT("/:", h.MerchantHandler.UpdateMerchant)
+		merchant.POST("/", h.MerchantHandler.Register)
+		merchant.DELETE("/:id", h.MerchantHandler.Delete)
+		merchant.GET("/", h.MerchantHandler.List)
+		merchant.GET("/:id", h.MerchantHandler.GetById)
+		merchant.GET("/name", h.MerchantHandler.GetByName)
+		merchant.PATCH("/", h.MerchantHandler.Update)
 	}
+
+	_ = merchant
 
 	server.router = router
 

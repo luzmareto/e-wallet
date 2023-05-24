@@ -2,23 +2,22 @@ package handler
 
 import (
 	"database/sql"
-	"net/http"
-	"strconv"
+	"fmt"
+
+	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
-	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/middleware"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
-	"github.com/gin-gonic/gin"
 )
 
 type MerchantHandler interface {
-	CreateMerchant(ctx *gin.Context)
-	DeleteMerchant(ctx *gin.Context)
-	GetMerchantById(ctx *gin.Context)
-	GetMerchantByUsername(ctx *gin.Context)
-	ListMerchant(ctx *gin.Context)
-	UpdateMerchant(ctx *gin.Context)
+	Register(ctx *gin.Context)
+	Delete(ctx *gin.Context)
+	GetById(ctx *gin.Context)
+	GetByName(ctx *gin.Context)
+	List(ctx *gin.Context)
+	Update(ctx *gin.Context)
 }
 
 type merchantHandler struct {
@@ -29,47 +28,51 @@ func NewMerchantHandler(service service.Service) MerchantHandler {
 	return &merchantHandler{service: service}
 }
 
-type UpdatMerchantsRequest struct {
-	ID          int64  `json:"id"`
-	Description string `json:"description"`
-	Address     string `json:"address"`
+type updatMerchantRequest struct {
+	ID          int64  `json:"id" binding:"required,min=1"`
+	Description string `json:"description" binding:"required"`
+	Address     string `json:"address" binding:"required"`
 }
 
-func (h *merchantHandler) UpdateMerchant(ctx *gin.Context) {
-	var request UpdatMerchantsRequest
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func (h *merchantHandler) Update(ctx *gin.Context) {
+	var req updatMerchantRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 
 	arg := db.UpdatMerchantsParams{
-		ID:          request.ID,
-		Description: request.Description,
-		Address:     request.Address,
+		ID:          req.ID,
+		Description: req.Description,
+		Address:     req.Address,
 	}
 
 	data, err := h.service.UpdatMerchants(ctx, arg)
 	if err != nil {
-		if customErr, ok := err.(*utils.CustomError); ok {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": customErr.Msg})
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(newErr.Error()))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update merchant"})
+		ctx.JSON(responseInternalServerError("failed to update merchant"))
 		return
 	}
 	ctx.JSON(responseOK("Success", data))
 }
 
-func (h *merchantHandler) GetMerchantByUsername(ctx *gin.Context) {
-	payload, err := middleware.GetPayload(ctx)
-	if err != nil {
+type getMerchantByNameRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
+func (h *merchantHandler) GetByName(ctx *gin.Context) {
+	var req getMerchantByNameRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
-	data, err := h.service.GetMerchantsByMerchantsName(ctx, payload.Username)
-	newErr := utils.CastError(err)
-
+	data, err := h.service.GetMerchantsByMerchantsName(ctx, req.Name)
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
@@ -80,94 +83,87 @@ func (h *merchantHandler) GetMerchantByUsername(ctx *gin.Context) {
 	ctx.JSON(responseOK("Success", data))
 }
 
-type ListMerchantsRequest struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+type listMerchantsRequest struct {
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=100"`
 }
 
-func (h *merchantHandler) ListMerchant(ctx *gin.Context) {
-
-	var request ListMerchantsRequest
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func (h *merchantHandler) List(ctx *gin.Context) {
+	var req listMerchantsRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 
 	arg := db.ListMerchantsParams{
-		Limit:  request.Limit,
-		Offset: request.Offset,
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
 	data, err := h.service.ListMerchants(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve merchants"})
+		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
 
 	ctx.JSON(responseOK("Success", data))
 }
 
-func (h *merchantHandler) GetMerchantById(ctx *gin.Context) {
-	merchantID := ctx.Param("id")
-
-	// Convert the merchant ID to int64
-	id, err := strconv.ParseInt(merchantID, 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid merchant ID"})
-		return
-	}
-
-	// Call the service method to retrieve the merchant by ID
-	merchant, err := h.service.GetMerchantsById(ctx, id)
-	if err != nil {
-		if customErr, ok := err.(*utils.CustomError); ok {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": customErr.Msg})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve merchant"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, merchant)
+type getMerchantByIdRequest struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
-func (h *merchantHandler) DeleteMerchant(ctx *gin.Context) {
-	// Extract the merchant ID from the request parameters
-	merchantID := ctx.Param("id")
-
-	// Convert the merchant ID to int64
-	id, err := strconv.ParseInt(merchantID, 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid merchant ID"})
+func (h *merchantHandler) GetById(ctx *gin.Context) {
+	var req getMerchantByIdRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
-
-	// Call the service method to delete the merchant
-	err = h.service.DeleteMerchants(ctx, id)
+	data, err := h.service.GetMerchantsById(ctx, req.ID)
 	if err != nil {
-		if customErr, ok := err.(*utils.CustomError); ok {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": customErr.Msg})
+		if err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(fmt.Sprintf("merchant with id %d not found", req.ID)))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete merchant"})
+		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Merchant deleted successfully"})
+	ctx.JSON(responseOK("Success", data))
+}
+
+func (h *merchantHandler) Delete(ctx *gin.Context) {
+	var req getMerchantByIdRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	err := h.service.DeleteMerchants(ctx, req.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(fmt.Sprintf("merchant with id %d not found", req.ID)))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("Success", nil))
 
 }
 
-type CreateMerchantsRequest struct {
+type createMerchantRequest struct {
 	MerchantName string `json:"merchant_name" binding:"required"`
 	Description  string `json:"description"`
 	Website      string `json:"website"`
 	Address      string `json:"address"`
 }
 
-func (h *merchantHandler) CreateMerchant(ctx *gin.Context) {
-	var req CreateMerchantsRequest
+func (h *merchantHandler) Register(ctx *gin.Context) {
+	var req createMerchantRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 
@@ -180,7 +176,7 @@ func (h *merchantHandler) CreateMerchant(ctx *gin.Context) {
 
 	data, err := h.service.CreateMerchants(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create merchant"})
+		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
 
