@@ -78,9 +78,8 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 	}
 
 	user, err := h.service.GetUserByUserName(ctx, payload.Username)
-	newErr := utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
@@ -96,9 +95,8 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 	}
 
 	data, err := h.service.CreateWallets(ctx, arg)
-	newErr = utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return

@@ -14,6 +14,7 @@ import (
 type StoreHandler interface {
 	TopupTransactions(ctx *gin.Context)
 	WithdrawalTransactions(ctx *gin.Context)
+	TransferTransactions(ctx *gin.Context)
 }
 
 type storeHandler struct {
@@ -128,4 +129,62 @@ func (h *storeHandler) WithdrawalTransactions(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(responseOK("Success", data))
+}
+
+type createTransferTransactionsRequest struct {
+	FromWalletID int32   `json:"from_wallet_id" binding:"required,min=1"`
+	ToWalletID   int32   `json:"to_wallet_id" binding:"required,min=1"`
+	Amount       float64 `json:"amount" binding:"required,min=10000"`
+	Description  string  `json:"description"`
+}
+
+// TransferTransactions implements StoreHandler.
+func (h *storeHandler) TransferTransactions(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	if err != nil {
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	var req createTransferTransactionsRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	arg := db.CreateTransferParams{
+		UserID:       int32(user.ID),
+		FromWalletID: req.FromWalletID,
+		ToWalletID:   req.ToWalletID,
+		Amount:       req.Amount,
+		Description:  req.Description,
+	}
+
+	data, err := h.service.TransferTransactions(ctx, arg)
+	if err != nil {
+		newErr := err.(*utils.CustomError)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+
+		if newErr.Err == sql.ErrConnDone {
+			ctx.JSON(responseNotFound(newErr.Msg))
+			return
+		}
+
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("success", data))
 }

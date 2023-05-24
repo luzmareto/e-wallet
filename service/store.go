@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
@@ -49,4 +50,59 @@ func (s *service) WithdrawalTransactions(ctx context.Context, arg db.CreateWithd
 	}
 
 	return s.store.WithdrawalTransactions(ctx, arg)
+}
+
+// TransferTransactions implements Service.
+func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransferParams) (db.TransferResult, error) {
+	var result db.TransferResult
+	var err error
+
+	walletFrom, err := s.queries.GetWalletById(ctx, int64(arg.FromWalletID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.FromWalletID),
+			Err: err,
+		}
+		return db.TransferResult{}, cstErr
+	}
+
+	if walletFrom.UserID != arg.UserID {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not yours", arg.FromWalletID),
+			Err: sql.ErrConnDone,
+		}
+		return db.TransferResult{}, cstErr
+	}
+
+	walletTo, err := s.queries.GetWalletById(ctx, int64(arg.ToWalletID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.ToWalletID),
+			Err: err,
+		}
+		return db.TransferResult{}, cstErr
+	}
+
+	if walletFrom.Currency != walletTo.Currency {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("cannt transfer from %s wallet to %s wallet", walletFrom.Currency, walletTo.Currency),
+			Err: sql.ErrConnDone,
+		}
+		return db.TransferResult{}, cstErr
+	}
+
+	if walletFrom.Balance < arg.Amount {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet %d balance not enought %s. %.2f", arg.FromWalletID, walletFrom.Currency, walletFrom.Balance),
+			Err: sql.ErrConnDone,
+		}
+		return db.TransferResult{}, cstErr
+	}
+
+	result, err = s.store.TransferTransactions(ctx, arg)
+	if err != nil {
+		return db.TransferResult{}, err
+	}
+
+	return result, err
 }

@@ -17,7 +17,7 @@ INSERT INTO users (
     phone_number
 ) VALUES (
     $1,$2,$3,$4
-) RETURNINg id, username, password, email, phone_number, registration_date, role
+) RETURNINg id, role, username, password, email, phone_number, id_card, registration_date
 `
 
 type CreateUsersParams struct {
@@ -37,12 +37,13 @@ func (q *Queries) CreateUsers(ctx context.Context, arg CreateUsersParams) (User,
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Role,
 		&i.Username,
 		&i.Password,
 		&i.Email,
 		&i.PhoneNumber,
+		&i.IDCard,
 		&i.RegistrationDate,
-		&i.Role,
 	)
 	return i, err
 }
@@ -57,7 +58,7 @@ func (q *Queries) DeleteUsers(ctx context.Context, id int64) error {
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, username, password, email, phone_number, registration_date, role FROM users WHERE id = $1
+SELECT id, role, username, password, email, phone_number, id_card, registration_date FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
@@ -65,18 +66,19 @@ func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Role,
 		&i.Username,
 		&i.Password,
 		&i.Email,
 		&i.PhoneNumber,
+		&i.IDCard,
 		&i.RegistrationDate,
-		&i.Role,
 	)
 	return i, err
 }
 
 const getUserByUserName = `-- name: GetUserByUserName :one
-SELECT id, username, password, email, phone_number, registration_date, role FROM users WHERE username = $1
+SELECT id, role, username, password, email, phone_number, id_card, registration_date FROM users WHERE username = $1
 `
 
 func (q *Queries) GetUserByUserName(ctx context.Context, username string) (User, error) {
@@ -84,18 +86,19 @@ func (q *Queries) GetUserByUserName(ctx context.Context, username string) (User,
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Role,
 		&i.Username,
 		&i.Password,
 		&i.Email,
 		&i.PhoneNumber,
+		&i.IDCard,
 		&i.RegistrationDate,
-		&i.Role,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, password, email, phone_number, registration_date, role FROM users LIMIT $1 OFFSET $2
+SELECT id, role, username, password, email, phone_number, id_card, registration_date FROM users ORDER BY id LIMIT $1 OFFSET $2
 `
 
 type ListUsersParams struct {
@@ -114,12 +117,13 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 		var i User
 		if err := rows.Scan(
 			&i.ID,
+			&i.Role,
 			&i.Username,
 			&i.Password,
 			&i.Email,
 			&i.PhoneNumber,
+			&i.IDCard,
 			&i.RegistrationDate,
-			&i.Role,
 		); err != nil {
 			return nil, err
 		}
@@ -135,7 +139,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 }
 
 const updateUsers = `-- name: UpdateUsers :one
-UPDATE users SET email = $2, phone_number = $3 WHERE id = $1 RETURNINg id, username, password, email, phone_number, registration_date, role
+UPDATE users SET email = $2, phone_number = $3 WHERE id = $1 RETURNINg id, role, username, password, email, phone_number, id_card, registration_date
 `
 
 type UpdateUsersParams struct {
@@ -149,12 +153,13 @@ func (q *Queries) UpdateUsers(ctx context.Context, arg UpdateUsersParams) (User,
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Role,
 		&i.Username,
 		&i.Password,
 		&i.Email,
 		&i.PhoneNumber,
+		&i.IDCard,
 		&i.RegistrationDate,
-		&i.Role,
 	)
 	return i, err
 }

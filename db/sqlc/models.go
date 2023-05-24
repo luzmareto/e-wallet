@@ -12,11 +12,11 @@ import (
 )
 
 type Merchant struct {
-	ID           int64          `json:"id"`
-	MerchantName string         `json:"merchant_name"`
-	Description  sql.NullString `json:"description"`
-	Website      sql.NullString `json:"website"`
-	Address      sql.NullString `json:"address"`
+	ID           int64  `json:"id"`
+	MerchantName string `json:"merchant_name"`
+	Description  string `json:"description"`
+	Website      string `json:"website"`
+	Address      string `json:"address"`
 }
 
 type Session struct {
@@ -64,12 +64,13 @@ type Transfer struct {
 
 type User struct {
 	ID               int64     `json:"id"`
+	Role             string    `json:"role"`
 	Username         string    `json:"username"`
 	Password         string    `json:"password"`
 	Email            string    `json:"email"`
 	PhoneNumber      string    `json:"phone_number"`
+	IDCard           string    `json:"id_card"`
 	RegistrationDate time.Time `json:"registration_date"`
-	Role             string    `json:"role"`
 }
 
 type Wallet struct {

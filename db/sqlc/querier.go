@@ -15,6 +15,7 @@ type Querier interface {
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateTopUps(ctx context.Context, arg CreateTopUpsParams) (Topup, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) error
+	CreateTransfers(ctx context.Context, arg CreateTransfersParams) (Transfer, error)
 	CreateUsers(ctx context.Context, arg CreateUsersParams) (User, error)
 	CreateWallets(ctx context.Context, arg CreateWalletsParams) (Wallet, error)
 	CreateWithdrawals(ctx context.Context, arg CreateWithdrawalsParams) (Withdrawal, error)
@@ -22,6 +23,8 @@ type Querier interface {
 	GetSessions(ctx context.Context, id uuid.UUID) (Session, error)
 	GetTransactionUserID(ctx context.Context, userID int32) ([]Transaction, error)
 	GetTransactionWalletID(ctx context.Context, walletID int32) ([]Transaction, error)
+	GetTransfersByFromWalletID(ctx context.Context, fromWalletID int32) ([]Transfer, error)
+	GetTransfersByFromWalletIdAndToWalletId(ctx context.Context, arg GetTransfersByFromWalletIdAndToWalletIdParams) ([]Transfer, error)
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByUserName(ctx context.Context, username string) (User, error)
 	GetWalletById(ctx context.Context, id int64) (Wallet, error)
