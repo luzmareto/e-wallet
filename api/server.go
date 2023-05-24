@@ -84,6 +84,7 @@ func (server *Server) setupRouter() {
 		wallet.POST("/", h.WalletHandler.CreateWallets)
 		wallet.POST("/withdrawal", h.StoreHandler.WithdrawalTransactions)
 		wallet.POST("/topups", h.StoreHandler.TopupTransactions)
+		wallet.POST("/transfer", h.StoreHandler.TopupTransactions)
 	}
 
 	server.router = router
