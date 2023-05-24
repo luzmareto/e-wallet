@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"io/fs"
+	"io/ioutil"
 	"testing"
 	"time"
 
@@ -28,6 +30,12 @@ func TestLoadConfig(t *testing.T) {
 	viper.Set("TOKEN_SYMETRIC_KEY", "your-secret-key")
 	viper.Set("ACCESS_TOKEN_DURATION", "1h")
 	viper.Set("REFRESH_TOKEN_DURATION", "24h")
+
+	// init file
+	byteFile, err := ioutil.ReadFile("../app.env.example")
+	require.NoError(t, err)
+
+	ioutil.WriteFile("app.env", byteFile, fs.ModeCharDevice)
 
 	// Call the LoadConfig function
 	config, err := LoadConfig("..")
