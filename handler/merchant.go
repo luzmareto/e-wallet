@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/middleware"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/service"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
@@ -35,6 +36,15 @@ type updatMerchantRequest struct {
 }
 
 func (h *merchantHandler) Update(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	if payload.Role != ROLE_ADMIN {
+		ctx.JSON(responseUnauthorized("role unauthorized"))
+		return
+	}
 	var req updatMerchantRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
@@ -61,12 +71,12 @@ func (h *merchantHandler) Update(ctx *gin.Context) {
 }
 
 type getMerchantByNameRequest struct {
-	Name string `json:"name" binding:"required"`
+	Name string `form:"name" binding:"required"`
 }
 
 func (h *merchantHandler) GetByName(ctx *gin.Context) {
 	var req getMerchantByNameRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
@@ -90,7 +100,7 @@ type listMerchantsRequest struct {
 
 func (h *merchantHandler) List(ctx *gin.Context) {
 	var req listMerchantsRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
@@ -133,13 +143,23 @@ func (h *merchantHandler) GetById(ctx *gin.Context) {
 }
 
 func (h *merchantHandler) Delete(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	if payload.Role != ROLE_ADMIN {
+		ctx.JSON(responseUnauthorized("role unauthorized"))
+		return
+	}
+
 	var req getMerchantByIdRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 
-	err := h.service.DeleteMerchants(ctx, req.ID)
+	err = h.service.DeleteMerchants(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(fmt.Sprintf("merchant with id %d not found", req.ID)))
@@ -161,6 +181,16 @@ type createMerchantRequest struct {
 }
 
 func (h *merchantHandler) Register(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	if payload.Role != ROLE_ADMIN {
+		ctx.JSON(responseUnauthorized("role unauthorized"))
+		return
+	}
+
 	var req createMerchantRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))

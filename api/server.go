@@ -93,7 +93,7 @@ func (server *Server) setupRouter() {
 		merchant.DELETE("/:id", h.MerchantHandler.Delete)
 		merchant.GET("/", h.MerchantHandler.List)
 		merchant.GET("/:id", h.MerchantHandler.GetById)
-		merchant.GET("/name", h.MerchantHandler.GetByName)
+		merchant.GET("/detail", h.MerchantHandler.GetByName)
 		merchant.PATCH("/", h.MerchantHandler.Update)
 	}
 
