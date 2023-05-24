@@ -5,10 +5,11 @@ import (
 )
 
 type Handler struct {
-	AuthHandler   AuthHandler
-	UserHandler   UserHandler
-	WalletHandler WalletHandler
-	StoreHandler  StoreHandler
+	AuthHandler     AuthHandler
+	UserHandler     UserHandler
+	WalletHandler   WalletHandler
+	StoreHandler    StoreHandler
+	MerchantHandler MerchantHandler
 }
 
 func New(
@@ -16,12 +17,14 @@ func New(
 	userHandler UserHandler,
 	walletHandler WalletHandler,
 	storeHandler StoreHandler,
+	merchantHandler MerchantHandler,
 ) *Handler {
 	return &Handler{
-		AuthHandler:   authHandler,
-		UserHandler:   userHandler,
-		WalletHandler: walletHandler,
-		StoreHandler:  storeHandler,
+		AuthHandler:     authHandler,
+		UserHandler:     userHandler,
+		WalletHandler:   walletHandler,
+		StoreHandler:    storeHandler,
+		MerchantHandler: merchantHandler,
 	}
 }
 

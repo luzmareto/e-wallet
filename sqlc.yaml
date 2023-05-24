@@ -25,3 +25,9 @@ overrides:
     column: "topups.description"
   - go_type: string
     column: "withdrawals.description"
+  - go_type: string
+    column: "merchants.description"
+  - go_type: string
+    column: "merchants.website"
+  - go_type: string
+    column: "merchants.address"

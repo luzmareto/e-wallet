@@ -47,6 +47,7 @@ func (server *Server) setupRouter() {
 	authHander := handler.NewAUthHandler(server.config, server.tokenMaker, svc)
 	walletHandler := handler.NewWalletHandler(svc)
 	storeHandler := handler.NewStoreHandler(svc)
+	merchantHandler := handler.NewMerchantHandler(svc)
 
 	// initiaate main handler
 	h := handler.New(
@@ -54,6 +55,7 @@ func (server *Server) setupRouter() {
 		userHander,
 		walletHandler,
 		storeHandler,
+		merchantHandler,
 	)
 
 	// init router
@@ -86,6 +88,18 @@ func (server *Server) setupRouter() {
 		wallet.POST("/topups", h.StoreHandler.TopupTransactions)
 		wallet.POST("/transfer", h.StoreHandler.TransferTransactions)
 	}
+
+	merchant := router.Group("/api/v1/merchants", middleware.AuthMiddleware(server.tokenMaker))
+	{
+		merchant.POST("/", h.MerchantHandler.Register)
+		merchant.DELETE("/:id", h.MerchantHandler.Delete)
+		merchant.GET("/", h.MerchantHandler.List)
+		merchant.GET("/:id", h.MerchantHandler.GetById)
+		merchant.GET("/name", h.MerchantHandler.GetByName)
+		merchant.PATCH("/", h.MerchantHandler.Update)
+	}
+
+	_ = merchant
 
 	server.router = router
 
