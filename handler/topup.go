@@ -44,9 +44,8 @@ func (h *topUpHandler) CreateTopUp(ctx *gin.Context) {
 	}
 
 	data, err := h.service.CreateTopUps(ctx, arg)
-	newErr := utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return

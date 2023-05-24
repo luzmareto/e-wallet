@@ -158,9 +158,8 @@ func (h *userHandler) Update(ctx *gin.Context) {
 		return
 	}
 	user, err := h.service.GetUserByUserName(ctx, payload.Username)
-	newErr := utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
@@ -181,9 +180,8 @@ func (h *userHandler) Update(ctx *gin.Context) {
 		PhoneNumber: req.PhoneNumber,
 	}
 	data, err := h.service.UpdateUsers(ctx, arg)
-	newErr = utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return

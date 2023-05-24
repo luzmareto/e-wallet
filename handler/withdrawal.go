@@ -44,9 +44,8 @@ func (h *withdrawalHandler) CreateWithdrawal(ctx *gin.Context) {
 	}
 
 	data, err := h.service.CreateWithdrawals(ctx, arg)
-	newErr := utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return

@@ -132,9 +132,9 @@ func (h *storeHandler) WithdrawalTransactions(ctx *gin.Context) {
 }
 
 type createTransferTransactionsRequest struct {
-	FromWalletID int32   `json:"from_wallet_id"`
-	ToWalletID   int32   `json:"to_wallet_id"`
-	Amount       float64 `json:"amount"`
+	FromWalletID int32   `json:"from_wallet_id" binding:"required,min=1"`
+	ToWalletID   int32   `json:"to_wallet_id" binding:"required,min=1"`
+	Amount       float64 `json:"amount" binding:"required,min=10000"`
 	Description  string  `json:"description"`
 }
 
@@ -146,9 +146,8 @@ func (h *storeHandler) TransferTransactions(ctx *gin.Context) {
 		return
 	}
 	user, err := h.service.GetUserByUserName(ctx, payload.Username)
-	newErr := utils.CastError(err)
-
 	if err != nil {
+		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return
@@ -171,9 +170,8 @@ func (h *storeHandler) TransferTransactions(ctx *gin.Context) {
 	}
 
 	data, err := h.service.TransferTransactions(ctx, arg)
-	newErr = err.(*utils.CustomError)
-
 	if err != nil {
+		newErr := err.(*utils.CustomError)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
 			return

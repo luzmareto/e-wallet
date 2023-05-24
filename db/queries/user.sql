@@ -24,4 +24,4 @@ SELECT * FROM users WHERE id = $1;
 SELECT * FROM users WHERE username = $1;
 
 -- name: ListUsers :many
-SELECT * FROM users LIMIT $1 OFFSET $2 ;
+SELECT * FROM users ORDER BY id LIMIT $1 OFFSET $2;

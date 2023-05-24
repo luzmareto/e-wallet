@@ -66,6 +66,14 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 		return db.TransferResult{}, cstErr
 	}
 
+	if walletFrom.UserID != arg.UserID {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not yours", arg.FromWalletID),
+			Err: sql.ErrConnDone,
+		}
+		return db.TransferResult{}, cstErr
+	}
+
 	walletTo, err := s.queries.GetWalletById(ctx, int64(arg.ToWalletID))
 	if err != nil {
 		cstErr := &utils.CustomError{
@@ -78,7 +86,7 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 	if walletFrom.Currency != walletTo.Currency {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("cannt transfer from %s wallet to %s wallet", walletFrom.Currency, walletTo.Currency),
-			Err: err,
+			Err: sql.ErrConnDone,
 		}
 		return db.TransferResult{}, cstErr
 	}
@@ -89,6 +97,11 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 			Err: sql.ErrConnDone,
 		}
 		return db.TransferResult{}, cstErr
+	}
+
+	result, err = s.store.TransferTransactions(ctx, arg)
+	if err != nil {
+		return db.TransferResult{}, err
 	}
 
 	return result, err
