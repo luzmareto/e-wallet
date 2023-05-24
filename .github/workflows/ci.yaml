@@ -48,4 +48,6 @@ jobs:
       run: make migrateup
 
     - name: Test
-      run: make test
+      run: |
+        cp app.env.example app.env
+        make test
