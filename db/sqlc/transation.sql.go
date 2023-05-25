@@ -14,17 +14,19 @@ INSERT INTO transactions (
     user_id,
     wallet_id,
     amount, 
-    description
+    description,
+    transaction_type
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
 `
 
 type CreateTransactionParams struct {
-	UserID      int32   `json:"user_id"`
-	WalletID    int32   `json:"wallet_id"`
-	Amount      float64 `json:"amount"`
-	Description string  `json:"description"`
+	UserID          int32   `json:"user_id"`
+	WalletID        int32   `json:"wallet_id"`
+	Amount          float64 `json:"amount"`
+	Description     string  `json:"description"`
+	TransactionType string  `json:"transaction_type"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) error {
@@ -33,12 +35,13 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.WalletID,
 		arg.Amount,
 		arg.Description,
+		arg.TransactionType,
 	)
 	return err
 }
 
 const getTransactionUserID = `-- name: GetTransactionUserID :many
-SELECT id, user_id, wallet_id, amount, transaction_date, description FROM transactions WHERE user_id = $1
+SELECT id, user_id, wallet_id, amount, transaction_date, transaction_type, description FROM transactions WHERE user_id = $1
 `
 
 func (q *Queries) GetTransactionUserID(ctx context.Context, userID int32) ([]Transaction, error) {
@@ -56,6 +59,7 @@ func (q *Queries) GetTransactionUserID(ctx context.Context, userID int32) ([]Tra
 			&i.WalletID,
 			&i.Amount,
 			&i.TransactionDate,
+			&i.TransactionType,
 			&i.Description,
 		); err != nil {
 			return nil, err
@@ -72,7 +76,7 @@ func (q *Queries) GetTransactionUserID(ctx context.Context, userID int32) ([]Tra
 }
 
 const getTransactionWalletID = `-- name: GetTransactionWalletID :many
-SELECT id, user_id, wallet_id, amount, transaction_date, description FROM transactions WHERE wallet_id = $1
+SELECT id, user_id, wallet_id, amount, transaction_date, transaction_type, description FROM transactions WHERE wallet_id = $1
 `
 
 func (q *Queries) GetTransactionWalletID(ctx context.Context, walletID int32) ([]Transaction, error) {
@@ -90,6 +94,7 @@ func (q *Queries) GetTransactionWalletID(ctx context.Context, walletID int32) ([
 			&i.WalletID,
 			&i.Amount,
 			&i.TransactionDate,
+			&i.TransactionType,
 			&i.Description,
 		); err != nil {
 			return nil, err

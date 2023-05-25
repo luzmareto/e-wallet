@@ -85,6 +85,7 @@ func (server *Server) setupRouter() {
 		wallet.POST("/withdrawal", h.StoreHandler.WithdrawalTransactions)
 		wallet.POST("/topups", h.StoreHandler.TopupTransactions)
 		wallet.POST("/transfer", h.StoreHandler.TransferTransactions)
+		wallet.POST("/payment/merchant", h.StoreHandler.MerchantPaymentTransactions)
 	}
 
 	merchant := router.Group("/api/v1/merchants", middleware.AuthMiddleware(server.tokenMaker))

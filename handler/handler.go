@@ -59,7 +59,7 @@ func responseNotFound(message string) (int, webResponse) {
 	}
 }
 
-func responseOK(message string, data interface{}) (int, webResponse) {
+func responseOK(message string, data ...interface{}) (int, webResponse) {
 	if data == nil {
 		return http.StatusOK, webResponse{
 			Code:    http.StatusOK,
@@ -71,7 +71,7 @@ func responseOK(message string, data interface{}) (int, webResponse) {
 		Code:    http.StatusOK,
 		Status:  "OK",
 		Message: message,
-		Data:    data,
+		Data:    data[0],
 	}
 }
 

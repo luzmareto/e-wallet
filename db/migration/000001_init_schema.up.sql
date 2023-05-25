@@ -22,6 +22,7 @@ CREATE TABLE "transactions" (
     "wallet_id" INT NOT NULL,
     "amount" NUMERIC(10, 2) NOT NULL,
     "transaction_date" timestamptz NOT NULL DEFAULT 'NOW()',
+    "transaction_type" VARCHAR(10) NOT NULL,
     "description" VARCHAR(255) NOT NULL
 );
 
@@ -57,7 +58,8 @@ CREATE TABLE "merchants" (
     "merchant_name" VARCHAR(255) NOT NULL,
     "description" VARCHAR(255) NOT NULL DEFAULT '',
     "website" VARCHAR(255) NOT NULL DEFAULT '',
-    "address" VARCHAR(255) NOT NULL DEFAULT ''
+    "address" VARCHAR(255) NOT NULL DEFAULT '',
+    "balance" NUMERIC(10, 2) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE "transaction_merchants" (

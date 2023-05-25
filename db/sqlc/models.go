@@ -12,11 +12,12 @@ import (
 )
 
 type Merchant struct {
-	ID           int64  `json:"id"`
-	MerchantName string `json:"merchant_name"`
-	Description  string `json:"description"`
-	Website      string `json:"website"`
-	Address      string `json:"address"`
+	ID           int64   `json:"id"`
+	MerchantName string  `json:"merchant_name"`
+	Description  string  `json:"description"`
+	Website      string  `json:"website"`
+	Address      string  `json:"address"`
+	Balance      float64 `json:"balance"`
 }
 
 type Session struct {
@@ -45,6 +46,7 @@ type Transaction struct {
 	WalletID        int32     `json:"wallet_id"`
 	Amount          float64   `json:"amount"`
 	TransactionDate time.Time `json:"transaction_date"`
+	TransactionType string    `json:"transaction_type"`
 	Description     string    `json:"description"`
 }
 

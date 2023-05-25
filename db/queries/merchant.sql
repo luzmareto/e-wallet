@@ -23,3 +23,6 @@ SELECT * FROM merchants WHERE merchant_name = $1;
 -- name: UpdatMerchants :one
 UPDATE merchants SET description = $2, address = $3 WHERE id = $1 RETURNINg *;
 
+-- name: AddMerchantBalance :one
+UPDATE merchants SET balance = balance + $2 WHERE id = $1 RETURNINg *;
+
