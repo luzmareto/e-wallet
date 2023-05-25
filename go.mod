@@ -3,6 +3,7 @@ module git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/cha
 go 1.19
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
