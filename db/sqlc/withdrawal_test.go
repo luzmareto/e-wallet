@@ -5,37 +5,42 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 func TestCreateWithdrawals(t *testing.T) {
-	user := createRandomMerchants(t)
+	wallet := createRandomWallets(t)
 	ctx := context.Background()
 
 	// Create a withdrawal
 	arg := CreateWithdrawalsParams{
-		UserID:      int32(user.ID),
-		WalletID:    1,
-		Amount:      10000,
-		Description: "Test withdrawal",
+		UserID:      int32(wallet.UserID),
+		WalletID:    int32(wallet.ID),
+		Amount:      float64(utils.RandomMoney()),
+		Description: utils.RandomString(255),
 	}
 
 	data, err := testQueries.CreateWithdrawals(ctx, arg)
 	require.NoError(t, err)
 	require.NotZero(t, data)
-	require.Equal(t, user.ID, int64(data.UserID))
-	require.Equal(t, int32(1), data.WalletID)
-	require.Equal(t, float64(10000), data.Amount)
+	require.Equal(t, wallet.UserID, data.UserID)
+	require.Equal(t, arg.WalletID, data.WalletID)
+	require.Equal(t, arg.Amount, data.Amount)
 	require.NotEmpty(t, data.WithdrawalDate)
-	require.Equal(t, "Test withdrawal", data.Description)
+	require.Equal(t, arg.Description, data.Description)
 }
 
-func TestCreateWithdrawalsNotFound(t *testing.T) {
+func TestCreateWithdrawalsFailed(t *testing.T) {
+	wallet := createRandomWallets(t)
 	ctx := context.Background()
+
+	// Create a withdrawal
 	arg := CreateWithdrawalsParams{
-		UserID:      12345,
-		WalletID:    1,
-		Amount:      10000,
-		Description: "Test withdrawal",
+		UserID:      0,
+		WalletID:    int32(wallet.ID),
+		Amount:      float64(utils.RandomMoney()),
+		Description: utils.RandomString(255),
 	}
 
 	_, err := testQueries.CreateWithdrawals(ctx, arg)
