@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -41,7 +40,7 @@ func TestCreateWithdrawalsNotFound(t *testing.T) {
 		Description: "Test withdrawal",
 	}
 
-	_, err := testQueries.CreateWithdrawals(ctx, arg)
+	user, err := testQueries.CreateWithdrawals(ctx, arg)
 	require.Error(t, err)
-	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.EqualError(t, err, arg.Description, user)
 }
