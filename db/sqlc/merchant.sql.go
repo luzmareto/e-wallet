@@ -9,6 +9,29 @@ import (
 	"context"
 )
 
+const addMerchantBalance = `-- name: AddMerchantBalance :one
+UPDATE merchants SET balance = balance + $2 WHERE id = $1 RETURNINg id, merchant_name, description, website, address, balance
+`
+
+type AddMerchantBalanceParams struct {
+	ID      int64   `json:"id"`
+	Balance float64 `json:"balance"`
+}
+
+func (q *Queries) AddMerchantBalance(ctx context.Context, arg AddMerchantBalanceParams) (Merchant, error) {
+	row := q.db.QueryRowContext(ctx, addMerchantBalance, arg.ID, arg.Balance)
+	var i Merchant
+	err := row.Scan(
+		&i.ID,
+		&i.MerchantName,
+		&i.Description,
+		&i.Website,
+		&i.Address,
+		&i.Balance,
+	)
+	return i, err
+}
+
 const createMerchants = `-- name: CreateMerchants :one
 INSERT INTO merchants (
     merchant_name,
@@ -17,7 +40,7 @@ INSERT INTO merchants (
     address
 ) VALUES (
     $1, $2, $3, $4
-) RETURNINg id, merchant_name, description, website, address
+) RETURNINg id, merchant_name, description, website, address, balance
 `
 
 type CreateMerchantsParams struct {
@@ -41,6 +64,7 @@ func (q *Queries) CreateMerchants(ctx context.Context, arg CreateMerchantsParams
 		&i.Description,
 		&i.Website,
 		&i.Address,
+		&i.Balance,
 	)
 	return i, err
 }
@@ -55,7 +79,7 @@ func (q *Queries) DeleteMerchants(ctx context.Context, id int64) error {
 }
 
 const getMerchantsById = `-- name: GetMerchantsById :one
-SELECT id, merchant_name, description, website, address FROM merchants WHERE id = $1
+SELECT id, merchant_name, description, website, address, balance FROM merchants WHERE id = $1
 `
 
 func (q *Queries) GetMerchantsById(ctx context.Context, id int64) (Merchant, error) {
@@ -67,12 +91,13 @@ func (q *Queries) GetMerchantsById(ctx context.Context, id int64) (Merchant, err
 		&i.Description,
 		&i.Website,
 		&i.Address,
+		&i.Balance,
 	)
 	return i, err
 }
 
 const getMerchantsByMerchantsName = `-- name: GetMerchantsByMerchantsName :one
-SELECT id, merchant_name, description, website, address FROM merchants WHERE merchant_name = $1
+SELECT id, merchant_name, description, website, address, balance FROM merchants WHERE merchant_name = $1
 `
 
 func (q *Queries) GetMerchantsByMerchantsName(ctx context.Context, merchantName string) (Merchant, error) {
@@ -84,12 +109,13 @@ func (q *Queries) GetMerchantsByMerchantsName(ctx context.Context, merchantName 
 		&i.Description,
 		&i.Website,
 		&i.Address,
+		&i.Balance,
 	)
 	return i, err
 }
 
 const listMerchants = `-- name: ListMerchants :many
-SELECT id, merchant_name, description, website, address FROM merchants LIMIT $1 OFFSET $2
+SELECT id, merchant_name, description, website, address, balance FROM merchants LIMIT $1 OFFSET $2
 `
 
 type ListMerchantsParams struct {
@@ -112,6 +138,7 @@ func (q *Queries) ListMerchants(ctx context.Context, arg ListMerchantsParams) ([
 			&i.Description,
 			&i.Website,
 			&i.Address,
+			&i.Balance,
 		); err != nil {
 			return nil, err
 		}
@@ -127,7 +154,7 @@ func (q *Queries) ListMerchants(ctx context.Context, arg ListMerchantsParams) ([
 }
 
 const updatMerchants = `-- name: UpdatMerchants :one
-UPDATE merchants SET description = $2, address = $3 WHERE id = $1 RETURNINg id, merchant_name, description, website, address
+UPDATE merchants SET description = $2, address = $3 WHERE id = $1 RETURNINg id, merchant_name, description, website, address, balance
 `
 
 type UpdatMerchantsParams struct {
@@ -145,6 +172,7 @@ func (q *Queries) UpdatMerchants(ctx context.Context, arg UpdatMerchantsParams) 
 		&i.Description,
 		&i.Website,
 		&i.Address,
+		&i.Balance,
 	)
 	return i, err
 }

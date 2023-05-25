@@ -3,9 +3,10 @@ INSERT INTO transactions (
     user_id,
     wallet_id,
     amount, 
-    description
+    description,
+    transaction_type
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 );
 
 -- name: GetTransactionUserID :many

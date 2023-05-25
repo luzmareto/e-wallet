@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	TRX_TRANSFER   = "TRANSFER:\n"
-	TRX_TOPUP      = "TOPUP:\n"
-	TRX_WITHDRAWAL = "WITHDRAWAL:\n"
-	TRX_PAYMENT    = "PAYMENT:\n"
+	TRX_TRANSFER   = "TRANSFER"
+	TRX_TOPUP      = "TOPUP"
+	TRX_WITHDRAWAL = "WITHDRAWAL"
+	TRX_PAYMENT    = "PAYMENT"
 )
 
 type Store interface {
@@ -18,7 +18,7 @@ type Store interface {
 	TransferTransactions(ctx context.Context, arg CreateTransferParams) (TransferResult, error)
 	TopupTransactions(ctx context.Context, arg CreateTopUpsParams) (TopupResult, error)
 	WithdrawalTransactions(ctx context.Context, arg CreateWithdrawalsParams) (WithdrawalResult, error)
-	// MerchantPaymentTransactions()
+	MerchantPaymentTransactions(ctx context.Context, arg CreateTransactionParams, merchantID int64) error
 }
 
 type sqlStore struct {
@@ -53,9 +53,35 @@ func (store *sqlStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 }
 
 // // MerchantPayment implements Store.
-// func (store *sqlStore) MerchantPaymentTransactions() {
-// 	panic("unimplemented")
-// }
+func (store *sqlStore) MerchantPaymentTransactions(ctx context.Context, arg CreateTransactionParams, merchantID int64) error {
+	err := store.execTx(ctx, func(q *Queries) error {
+		var err error
+
+		_, err = q.GetMerchantsById(ctx, merchantID)
+		if err != nil {
+			return err
+		}
+		_, err = q.AddMerchantBalance(ctx, AddMerchantBalanceParams{
+			ID:      merchantID,
+			Balance: arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+		arg.Amount = -arg.Amount
+		arg.TransactionType = TRX_PAYMENT
+
+		_, err = q.AddWalletBalance(ctx, AddWalletBalanceParams{
+			ID:      int64(arg.WalletID),
+			Balance: arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+		return q.CreateTransaction(ctx, arg)
+	})
+	return err
+}
 
 type TopupResult struct {
 	Topup  Topup  `json:"topup_details"`
@@ -84,10 +110,11 @@ func (store *sqlStore) TopupTransactions(ctx context.Context, arg CreateTopUpsPa
 			return err
 		}
 		trxArg := CreateTransactionParams{
-			UserID:      arg.UserID,
-			WalletID:    arg.WalletID,
-			Amount:      arg.Amount,
-			Description: TRX_TOPUP + arg.Description,
+			UserID:          arg.UserID,
+			WalletID:        arg.WalletID,
+			Amount:          arg.Amount,
+			Description:     arg.Description,
+			TransactionType: TRX_TOPUP,
 		}
 		err = q.CreateTransaction(ctx, trxArg)
 		return err
@@ -132,20 +159,22 @@ func (store *sqlStore) TransferTransactions(ctx context.Context, arg CreateTrans
 		}
 
 		err = q.CreateTransaction(ctx, CreateTransactionParams{
-			UserID:      arg.UserID,
-			WalletID:    arg.FromWalletID,
-			Amount:      -arg.Amount,
-			Description: TRX_TRANSFER + arg.Description,
+			UserID:          arg.UserID,
+			WalletID:        arg.FromWalletID,
+			Amount:          -arg.Amount,
+			Description:     arg.Description,
+			TransactionType: TRX_TRANSFER,
 		})
 		if err != nil {
 			return err
 		}
 
 		err = q.CreateTransaction(ctx, CreateTransactionParams{
-			UserID:      arg.UserID,
-			WalletID:    arg.ToWalletID,
-			Amount:      arg.Amount,
-			Description: TRX_TRANSFER + arg.Description,
+			UserID:          arg.UserID,
+			WalletID:        arg.ToWalletID,
+			Amount:          arg.Amount,
+			Description:     arg.Description,
+			TransactionType: TRX_TRANSFER,
 		})
 		if err != nil {
 			return err
@@ -193,10 +222,11 @@ func (store *sqlStore) WithdrawalTransactions(ctx context.Context, arg CreateWit
 		}
 
 		err = q.CreateTransaction(ctx, CreateTransactionParams{
-			UserID:      arg.UserID,
-			WalletID:    arg.WalletID,
-			Amount:      -arg.Amount,
-			Description: TRX_WITHDRAWAL + arg.Description,
+			UserID:          arg.UserID,
+			WalletID:        arg.WalletID,
+			Amount:          -arg.Amount,
+			Description:     arg.Description,
+			TransactionType: TRX_WITHDRAWAL,
 		})
 		return err
 	})

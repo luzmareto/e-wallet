@@ -31,3 +31,5 @@ overrides:
     column: "merchants.website"
   - go_type: string
     column: "merchants.address"
+  - go_type: float64
+    column: "merchants.balance"

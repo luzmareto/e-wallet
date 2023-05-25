@@ -106,3 +106,23 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 
 	return result, err
 }
+
+// MerchantPaymentTransactions implements Service.
+func (s *service) MerchantPaymentTransactions(ctx context.Context, arg db.CreateTransactionParams, merchantID int64) error {
+	wallet, err := s.store.GetWalletById(ctx, int64(arg.WalletID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+			Err: err,
+		}
+		return cstErr
+	}
+	if wallet.Balance < arg.Amount {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet %d balance not enought %s. %.2f", arg.WalletID, wallet.Currency, wallet.Balance),
+			Err: sql.ErrConnDone,
+		}
+		return cstErr
+	}
+	return s.store.MerchantPaymentTransactions(ctx, arg, merchantID)
+}

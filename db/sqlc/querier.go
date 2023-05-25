@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	AddMerchantBalance(ctx context.Context, arg AddMerchantBalanceParams) (Merchant, error)
 	AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) (Wallet, error)
 	CreateMerchants(ctx context.Context, arg CreateMerchantsParams) (Merchant, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)

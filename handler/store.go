@@ -15,6 +15,7 @@ type StoreHandler interface {
 	TopupTransactions(ctx *gin.Context)
 	WithdrawalTransactions(ctx *gin.Context)
 	TransferTransactions(ctx *gin.Context)
+	MerchantPaymentTransactions(ctx *gin.Context)
 }
 
 type storeHandler struct {
@@ -44,7 +45,7 @@ func (h *storeHandler) TopupTransactions(ctx *gin.Context) {
 
 	if err != nil {
 		if newErr.Err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(err.Error()))
+			ctx.JSON(responseNotFound(newErr.Msg))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))
@@ -68,7 +69,7 @@ func (h *storeHandler) TopupTransactions(ctx *gin.Context) {
 
 	if err != nil {
 		if newErr.Err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(err.Error()))
+			ctx.JSON(responseNotFound(newErr.Msg))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))
@@ -118,7 +119,7 @@ func (h *storeHandler) WithdrawalTransactions(ctx *gin.Context) {
 
 	if err != nil {
 		if newErr.Err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(err.Error()))
+			ctx.JSON(responseNotFound(newErr.Msg))
 			return
 		}
 		if newErr.Err.Error() == "unauthorized" {
@@ -149,7 +150,7 @@ func (h *storeHandler) TransferTransactions(ctx *gin.Context) {
 	if err != nil {
 		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(err.Error()))
+			ctx.JSON(responseNotFound(newErr.Msg))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))
@@ -173,12 +174,12 @@ func (h *storeHandler) TransferTransactions(ctx *gin.Context) {
 	if err != nil {
 		newErr := err.(*utils.CustomError)
 		if newErr.Err == sql.ErrNoRows {
-			ctx.JSON(responseNotFound(err.Error()))
+			ctx.JSON(responseNotFound(newErr.Msg))
 			return
 		}
 
 		if newErr.Err == sql.ErrConnDone {
-			ctx.JSON(responseNotFound(newErr.Msg))
+			ctx.JSON(responseBadRequest(newErr.Msg))
 			return
 		}
 
@@ -187,4 +188,62 @@ func (h *storeHandler) TransferTransactions(ctx *gin.Context) {
 	}
 
 	ctx.JSON(responseOK("success", data))
+}
+
+type merchantPaymentRequest struct {
+	UserID      int32   `json:"-"`
+	WalletID    int32   `json:"wallet_id"`
+	MerchantID  int64   `json:"merchant_id"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
+}
+
+// MerchantPaymentTransactions implements StoreHandler.
+func (h *storeHandler) MerchantPaymentTransactions(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	if err != nil {
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(newErr.Msg))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	var req merchantPaymentRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	arg := db.CreateTransactionParams{
+		UserID:      int32(user.ID),
+		WalletID:    req.WalletID,
+		Amount:      req.Amount,
+		Description: req.Description,
+	}
+
+	err = h.service.MerchantPaymentTransactions(ctx, arg, req.MerchantID)
+	if err != nil {
+		newErr := err.(*utils.CustomError)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(newErr.Msg))
+			return
+		}
+
+		if newErr.Err == sql.ErrConnDone {
+			ctx.JSON(responseBadRequest(newErr.Msg))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("success", nil))
 }
