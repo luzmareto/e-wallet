@@ -31,8 +31,6 @@ func TestCreateWithdrawals(t *testing.T) {
 
 func TestCreateWithdrawalsNotFound(t *testing.T) {
 	ctx := context.Background()
-
-	// Create a withdrawal for a user that does not exist
 	arg := CreateWithdrawalsParams{
 		UserID:      12345,
 		WalletID:    1,
@@ -40,7 +38,7 @@ func TestCreateWithdrawalsNotFound(t *testing.T) {
 		Description: "Test withdrawal",
 	}
 
-	user, err := testQueries.CreateWithdrawals(ctx, arg)
+	_, err := testQueries.CreateWithdrawals(ctx, arg)
 	require.Error(t, err)
-	require.EqualError(t, err, arg.Description, user)
+	require.EqualError(t, err, "pq: insert or update on table \"withdrawals\" violates foreign key constraint \"withdrawals_user_id_fkey\"")
 }
