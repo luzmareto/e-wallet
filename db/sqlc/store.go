@@ -147,12 +147,6 @@ func (store *sqlStore) TransferTransactions(ctx context.Context, arg CreateTrans
 			Balance: -arg.Amount,
 		})
 		if err != nil {
-			fmt.Println(`CALLED 1
-			result.FromWallet, err = q.AddWalletBalance(ctx, AddWalletBalanceParams{
-				ID:      int64(arg.FromWalletID),
-				Balance: -arg.Amount,
-			})
-			`)
 			return err
 		}
 
@@ -161,12 +155,6 @@ func (store *sqlStore) TransferTransactions(ctx context.Context, arg CreateTrans
 			Balance: arg.Amount,
 		})
 		if err != nil {
-			fmt.Println(`CALLED 2
-			result.FromWallet, err = q.AddWalletBalance(ctx, AddWalletBalanceParams{
-				ID:      int64(arg.FromWalletID),
-				Balance: 2arg.Amount,
-			})
-			`)
 			return err
 		}
 
@@ -178,14 +166,6 @@ func (store *sqlStore) TransferTransactions(ctx context.Context, arg CreateTrans
 			TransactionType: TRX_TRANSFER,
 		})
 		if err != nil {
-			fmt.Println(`CALLED 3
-			err = q.CreateTransaction(ctx, CreateTransactionParams{
-				UserID:          arg.UserID,
-				WalletID:        arg.FromWalletID,
-				Amount:          -arg.Amount,
-				Description:     arg.Description,
-				TransactionType: TRX_TRANSFER,
-			})			`)
 			return err
 		}
 
@@ -197,14 +177,6 @@ func (store *sqlStore) TransferTransactions(ctx context.Context, arg CreateTrans
 			TransactionType: TRX_TRANSFER,
 		})
 		if err != nil {
-			fmt.Println(`CALLED 4
-			err = q.CreateTransaction(ctx, CreateTransactionParams{
-				UserID:          arg.UserID,
-				WalletID:        arg.FromWalletID,
-				Amount:          arg.Amount,
-				Description:     arg.Description,
-				TransactionType: TRX_TRANSFER,
-			})			`)
 			return err
 		}
 
