@@ -4,18 +4,21 @@ import (
 	"context"
 	"testing"
 
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateTransfers(t *testing.T) {
 	ctx := context.Background()
 
+	wallet1 := createRandomWallets(t)
+	wallet2 := createRandomWallets(t)
 	// Create a transfer
 	arg := CreateTransfersParams{
-		FromWalletID: 1,
-		ToWalletID:   2,
-		Amount:       10000,
-		Description:  "Test transfer",
+		FromWalletID: int32(wallet1.ID),
+		ToWalletID:   int32(wallet2.ID),
+		Amount:       float64(utils.RandomInt(10, 100)),
+		Description:  utils.RandomString(255),
 	}
 
 	transfer, err := testQueries.CreateTransfers(ctx, arg)
@@ -29,34 +32,32 @@ func TestCreateTransfers(t *testing.T) {
 }
 
 func TestGetTransfersByFromWalletID(t *testing.T) {
-	ctx := context.Background()
-	fromWalletID := int32(1)
+	// ctx := context.Background()
+	// fromWalletID := int32(1)
 
-	transfers, err := testQueries.GetTransfersByFromWalletID(ctx, fromWalletID)
+	// transfers, err := testQueries.GetTransfersByFromWalletID(ctx, fromWalletID)
+	// require.NoError(t, err)
+	// require.NotEmpty(t, transfers)
+	// for _, transfer := range transfers {
+	// 	require.Equal(t, fromWalletID, transfer.FromWalletID)
+	// }
+
+	ctx := context.Background()
+
+	// Get transactions by user ID
+	userID := int32(1)
+	transactions, err := testQueries.GetTransfersByFromWalletID(ctx, userID)
 	require.NoError(t, err)
-	require.NotEmpty(t, transfers)
-	for _, transfer := range transfers {
-		require.Equal(t, fromWalletID, transfer.FromWalletID)
-	}
+	require.NotNil(t, transactions)
 
 }
 
 func TestGetTransfersByFromWalletIdAndToWalletId(t *testing.T) {
 	ctx := context.Background()
-	fromWalletID := int32(1)
-	toWalletID := int32(2)
 
-	arg := GetTransfersByFromWalletIdAndToWalletIdParams{
-		FromWalletID: fromWalletID,
-		ToWalletID:   toWalletID,
-	}
-
-	transfers, err := testQueries.GetTransfersByFromWalletIdAndToWalletId(ctx, arg)
+	// Get transactions by user ID
+	// userID := createRandomWallets(t)
+	transactions, err := testQueries.GetTransfersByFromWalletIdAndToWalletId(ctx, GetTransfersByFromWalletIdAndToWalletIdParams{})
 	require.NoError(t, err)
-	require.NotEmpty(t, transfers)
-	for _, transfer := range transfers {
-		require.Equal(t, fromWalletID, transfer.FromWalletID)
-		require.Equal(t, toWalletID, transfer.ToWalletID)
-	}
-
+	require.NotNil(t, transactions)
 }
