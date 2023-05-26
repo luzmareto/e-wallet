@@ -12,6 +12,7 @@ import (
 
 var testQueries *Queries
 var testDB *sql.DB
+var testStore Store
 
 func TestMain(m *testing.M) {
 	config, err := utils.LoadConfig("../..")
@@ -21,6 +22,7 @@ func TestMain(m *testing.M) {
 
 	testDB = db.Connect(*config)
 	testQueries = New(testDB)
+	testStore = NewStore(testDB)
 
 	os.Exit(m.Run())
 }

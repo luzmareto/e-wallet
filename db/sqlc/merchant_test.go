@@ -134,3 +134,20 @@ func TestUpdate(t *testing.T) {
 	require.Equal(t, arg.Description, updatedMerchants.Description)
 	require.Equal(t, arg.Address, updatedMerchants.Address)
 }
+
+func TestAddMerchantBalance(t *testing.T) {
+	merchant := createRandomMerchants(t)
+	ctx := context.Background()
+
+	arg := AddMerchantBalanceParams{
+		ID:      merchant.ID,
+		Balance: 1000,
+	}
+
+	updatedMerchants, err := testQueries.AddMerchantBalance(ctx, arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedMerchants)
+
+	require.Equal(t, arg.ID, updatedMerchants.ID)
+	require.Equal(t, merchant.Balance+arg.Balance, updatedMerchants.Balance)
+}
