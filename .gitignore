@@ -2,3 +2,6 @@ app.env
 build/
 
 Makefile
+
+*.csv
+tmp/

@@ -157,6 +157,6 @@ func (s *service) WalletHistory(ctx context.Context, arg db.GetTransactionWallet
 		}
 		return result, cstErr
 	}
-
+	GenerateCSVWalletHistory(result.Transactions, result.Transfers)
 	return result, err
 }
