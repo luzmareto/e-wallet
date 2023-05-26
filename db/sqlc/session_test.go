@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 func createRandomUser1(t *testing.T) User {
@@ -61,7 +62,7 @@ func TestGetSessions(t *testing.T) {
 	user := createRandomUser(t)
 
 	arg := CreateSessionParams{
-		ID:           [16]byte{byte(utils.RandomInt(1, 1000))},
+		ID:           [16]byte{byte(utils.RandomInt(1, 10000000))},
 		Username:     user.Username,
 		RefreshToken: "refresh-token",
 		UserAgent:    "user-agent",
