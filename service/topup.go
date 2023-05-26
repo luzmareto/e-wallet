@@ -8,5 +8,5 @@ import (
 
 // CreateTopUps implements Service
 func (s *service) CreateTopUps(ctx context.Context, arg db.CreateTopUpsParams) (db.Topup, error) {
-	return s.queries.CreateTopUps(ctx, arg)
+	return s.store.CreateTopUps(ctx, arg)
 }

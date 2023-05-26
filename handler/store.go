@@ -16,6 +16,7 @@ type StoreHandler interface {
 	WithdrawalTransactions(ctx *gin.Context)
 	TransferTransactions(ctx *gin.Context)
 	MerchantPaymentTransactions(ctx *gin.Context)
+	WalletHistory(ctx *gin.Context)
 }
 
 type storeHandler struct {
@@ -245,5 +246,57 @@ func (h *storeHandler) MerchantPaymentTransactions(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(responseOK("success", nil))
+	ctx.JSON(responseOK("success"))
+}
+
+type walletHistoryRequest struct {
+	WalletID int32 `uri:"wallet_id" binding:"required,min=1"`
+}
+
+// WalletHistory implements StoreHandler.
+func (h *storeHandler) WalletHistory(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	if err != nil {
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(newErr.Msg))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	var req walletHistoryRequest
+
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	data, err := h.service.WalletHistory(ctx, db.GetTransactionWalletByidAndUserIDParams{
+		WalletID: req.WalletID,
+		UserID:   int32(user.ID),
+	})
+	if err != nil {
+		newErr := err.(*utils.CustomError)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(newErr.Msg))
+			return
+		}
+
+		if newErr.Err == sql.ErrConnDone {
+			ctx.JSON(responseBadRequest(newErr.Msg))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("Success", data))
+
 }

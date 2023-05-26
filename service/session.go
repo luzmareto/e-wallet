@@ -10,10 +10,10 @@ import (
 
 // CreateSession implements Service.
 func (s *service) CreateSession(ctx context.Context, arg db.CreateSessionParams) (db.Session, error) {
-	return s.queries.CreateSession(ctx, arg)
+	return s.store.CreateSession(ctx, arg)
 }
 
 // GetSessions implements Service.
 func (s *service) GetSessions(ctx context.Context, id uuid.UUID) (db.Session, error) {
-	return s.queries.GetSessions(ctx, id)
+	return s.store.GetSessions(ctx, id)
 }

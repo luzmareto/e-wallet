@@ -41,13 +41,13 @@ type Topup struct {
 }
 
 type Transaction struct {
-	ID              int64     `json:"id"`
-	UserID          int32     `json:"user_id"`
-	WalletID        int32     `json:"wallet_id"`
-	Amount          float64   `json:"amount"`
-	TransactionDate time.Time `json:"transaction_date"`
-	TransactionType string    `json:"transaction_type"`
-	Description     string    `json:"description"`
+	ID              int64   `json:"id"`
+	UserID          int32   `json:"user_id"`
+	WalletID        int32   `json:"wallet_id"`
+	Amount          float64 `json:"amount"`
+	TransactionDate string  `json:"transaction_date"`
+	TransactionType string  `json:"transaction_type"`
+	Description     string  `json:"description"`
 }
 
 type TransactionMerchant struct {

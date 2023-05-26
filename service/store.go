@@ -11,7 +11,7 @@ import (
 
 // Topup implements Service.
 func (s *service) TopupTransactions(ctx context.Context, arg db.CreateTopUpsParams) (db.TopupResult, error) {
-	if _, err := s.queries.GetWalletById(ctx, int64(arg.WalletID)); err != nil {
+	if _, err := s.store.GetWalletById(ctx, int64(arg.WalletID)); err != nil {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
 			Err: err,
@@ -23,7 +23,7 @@ func (s *service) TopupTransactions(ctx context.Context, arg db.CreateTopUpsPara
 
 // WithdrawalTransactions implements Service.
 func (s *service) WithdrawalTransactions(ctx context.Context, arg db.CreateWithdrawalsParams) (db.WithdrawalResult, error) {
-	wallet, err := s.queries.GetWalletById(ctx, int64(arg.WalletID))
+	wallet, err := s.store.GetWalletById(ctx, int64(arg.WalletID))
 	if err != nil {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
@@ -32,7 +32,7 @@ func (s *service) WithdrawalTransactions(ctx context.Context, arg db.CreateWithd
 		return db.WithdrawalResult{}, cstErr
 	}
 
-	user, err := s.queries.GetUserById(ctx, int64(arg.UserID))
+	user, err := s.store.GetUserById(ctx, int64(arg.UserID))
 	if err != nil {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("user with id %d not found", arg.WalletID),
@@ -57,7 +57,7 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 	var result db.TransferResult
 	var err error
 
-	walletFrom, err := s.queries.GetWalletById(ctx, int64(arg.FromWalletID))
+	walletFrom, err := s.store.GetWalletById(ctx, int64(arg.FromWalletID))
 	if err != nil {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("wallet with id %d not found", arg.FromWalletID),
@@ -74,7 +74,7 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 		return db.TransferResult{}, cstErr
 	}
 
-	walletTo, err := s.queries.GetWalletById(ctx, int64(arg.ToWalletID))
+	walletTo, err := s.store.GetWalletById(ctx, int64(arg.ToWalletID))
 	if err != nil {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("wallet with id %d not found", arg.ToWalletID),
@@ -125,4 +125,38 @@ func (s *service) MerchantPaymentTransactions(ctx context.Context, arg db.Create
 		return cstErr
 	}
 	return s.store.MerchantPaymentTransactions(ctx, arg, merchantID)
+}
+
+// WalletHistory implements Service.
+func (s *service) WalletHistory(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams) (db.WalletHistoryResult, error) {
+	var result db.WalletHistoryResult
+	var err error
+	_, err = s.store.GetWalletById(ctx, int64(arg.WalletID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+			Err: err,
+		}
+		return result, cstErr
+	}
+
+	_, err = s.store.GetUserById(ctx, int64(arg.UserID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+			Err: err,
+		}
+		return result, cstErr
+	}
+
+	result, err = s.store.WalletHistory(ctx, arg)
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: "failed to get wallet history",
+			Err: err,
+		}
+		return result, cstErr
+	}
+
+	return result, err
 }

@@ -46,7 +46,6 @@ func (server *Server) setupRouter() {
 	walletHandler := handler.NewWalletHandler(svc)
 	storeHandler := handler.NewStoreHandler(svc)
 	merchantHandler := handler.NewMerchantHandler(svc)
-
 	// initiaate main handler
 	h := handler.New(
 		authHander,
@@ -86,6 +85,7 @@ func (server *Server) setupRouter() {
 		wallet.POST("/topups", h.StoreHandler.TopupTransactions)
 		wallet.POST("/transfer", h.StoreHandler.TransferTransactions)
 		wallet.POST("/payment/merchant", h.StoreHandler.MerchantPaymentTransactions)
+		wallet.GET("/history/:wallet_id", h.StoreHandler.WalletHistory)
 	}
 
 	merchant := router.Group("/api/v1/merchants", middleware.AuthMiddleware(server.tokenMaker))

@@ -27,6 +27,7 @@ type Querier interface {
 	GetMerchantsByMerchantsName(ctx context.Context, merchantName string) (Merchant, error)
 	GetSessions(ctx context.Context, id uuid.UUID) (Session, error)
 	GetTransactionUserID(ctx context.Context, userID int32) ([]Transaction, error)
+	GetTransactionWalletByidAndUserID(ctx context.Context, arg GetTransactionWalletByidAndUserIDParams) ([]Transaction, error)
 	GetTransactionWalletID(ctx context.Context, walletID int32) ([]Transaction, error)
 	GetTransfersByFromWalletID(ctx context.Context, fromWalletID int32) ([]Transfer, error)
 	GetTransfersByFromWalletIdAndToWalletId(ctx context.Context, arg GetTransfersByFromWalletIdAndToWalletIdParams) ([]Transfer, error)

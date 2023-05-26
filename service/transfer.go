@@ -8,15 +8,15 @@ import (
 
 // CreateTransfers implements Service.
 func (s *service) CreateTransfers(ctx context.Context, arg db.CreateTransfersParams) (db.Transfer, error) {
-	return s.queries.CreateTransfers(ctx, arg)
+	return s.store.CreateTransfers(ctx, arg)
 }
 
 // GetTransfersByFromWalletID implements Service.
 func (s *service) GetTransfersByFromWalletID(ctx context.Context, fromWalletID int32) ([]db.Transfer, error) {
-	return s.queries.GetTransfersByFromWalletID(ctx, fromWalletID)
+	return s.store.GetTransfersByFromWalletID(ctx, fromWalletID)
 }
 
 // GetTransfersByFromWalletIdAndToWalletId implements Service.
 func (s *service) GetTransfersByFromWalletIdAndToWalletId(ctx context.Context, arg db.GetTransfersByFromWalletIdAndToWalletIdParams) ([]db.Transfer, error) {
-	return s.queries.GetTransfersByFromWalletIdAndToWalletId(ctx, arg)
+	return s.store.GetTransfersByFromWalletIdAndToWalletId(ctx, arg)
 }

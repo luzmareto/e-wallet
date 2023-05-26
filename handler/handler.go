@@ -100,6 +100,7 @@ func responseUnauthorized(message string) (int, webResponse) {
 }
 
 const (
-	ROLE_ADMIN = "admin"
-	ROLE_USER  = "user"
+	ROLE_ADMIN  = "admin"
+	ROLE_USER   = "user"
+	DATE_LAYOUT = "2006-01-02"
 )

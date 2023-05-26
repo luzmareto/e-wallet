@@ -10,12 +10,12 @@ import (
 
 // Createwithdrawals implements Service
 func (s *service) CreateWithdrawals(ctx context.Context, arg db.CreateWithdrawalsParams) (db.Withdrawal, error) {
-	if _, err := s.queries.GetUserById(ctx, int64(arg.UserID)); err != nil {
+	if _, err := s.store.GetUserById(ctx, int64(arg.UserID)); err != nil {
 		cstErr := &utils.CustomError{
 			Msg: fmt.Sprintf("user with id %d not found", arg.UserID),
 			Err: err,
 		}
 		return db.Withdrawal{}, cstErr
 	}
-	return s.queries.CreateWithdrawals(ctx, arg)
+	return s.store.CreateWithdrawals(ctx, arg)
 }

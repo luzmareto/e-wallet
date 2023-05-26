@@ -14,3 +14,9 @@ SELECT * FROM transactions WHERE user_id = $1;
 
 -- name: GetTransactionWalletID :many
 SELECT * FROM transactions WHERE wallet_id = $1;
+
+-- name: GetTransactionWalletByidAndUserID :many
+SELECT * FROM transactions
+WHERE wallet_id = $1 
+AND user_id = $2 
+ORDER BY transaction_date DESC;
