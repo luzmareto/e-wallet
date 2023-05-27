@@ -13,6 +13,10 @@ type Config struct {
 	TokenSymetricKey     string        `mapstructure:"TOKEN_SYMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	AwsRegion            string        `mapstructure:"AWS_REGION"`
+	AwsS3Bucket          string        `mapstructure:"AWS_S3_BUCKET"`
+	AwsAccessKeyID       string        `mapstructure:"AWS_ACCESS_KEY_ID"`
+	AwsSecretKeyID       string        `mapstructure:"AWS_SECRET_ACCESS_KEY"`
 }
 
 func LoadConfig(path string) (config *Config, err error) {

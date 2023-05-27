@@ -41,7 +41,7 @@ func (server *Server) setupRouter() {
 	svc := service.New(dbconn)
 
 	// initialte handler
-	userHander := handler.NewUserHandler(svc)
+	userHander := handler.NewUserHandler(svc, server.config)
 	authHander := handler.NewAUthHandler(server.config, server.tokenMaker, svc)
 	walletHandler := handler.NewWalletHandler(svc)
 	storeHandler := handler.NewStoreHandler(svc)
@@ -73,6 +73,7 @@ func (server *Server) setupRouter() {
 		user.GET("/", h.UserHandler.List)
 		user.GET("/:id", h.UserHandler.GetByID)
 		user.GET("/detail", h.UserHandler.GetByUsername)
+		user.POST("/upload-id", h.UserHandler.UploadIDCard)
 		user.PATCH("/", h.UserHandler.Update)
 	}
 

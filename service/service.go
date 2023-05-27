@@ -7,6 +7,7 @@ import (
 	"os"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
+	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/utils"
 )
 
 type Service interface {
@@ -28,7 +29,7 @@ func New(sqlDB *sql.DB) Service {
 }
 
 func GenerateCSVWalletHistory(transactions []db.Transaction, transfer []db.Transfer) (string, string, error) {
-	directory := "tmp"
+	directory := utils.DIRECTORY_REPORTS
 
 	trxFilename := fmt.Sprintf("%s/history_transactions_wallet_%d.csv", directory, transactions[0].WalletID)
 	tfFilename := fmt.Sprintf("%s/history_transfer_wallet_%d.csv", directory, transactions[0].WalletID)

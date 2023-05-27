@@ -2,8 +2,10 @@ package handler
 
 import (
 	"database/sql"
+	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
 	"git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/middleware"
@@ -17,14 +19,28 @@ type UserHandler interface {
 	GetByID(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Update(ctx *gin.Context)
+	UploadIDCard(ctx *gin.Context)
 }
 
 type userHandler struct {
-	service service.Service
+	service   service.Service
+	config    utils.Config
+	awsClient utils.AWSS3Client
 }
 
-func NewUserHandler(service service.Service) UserHandler {
-	return &userHandler{service: service}
+func NewUserHandler(service service.Service, config utils.Config) UserHandler {
+	awsClient := utils.NewAWSS3Client(utils.Config{
+		AwsAccessKeyID: config.AwsAccessKeyID,
+		AwsSecretKeyID: config.AwsSecretKeyID,
+		AwsRegion:      config.AwsRegion,
+		AwsS3Bucket:    config.AwsS3Bucket,
+	})
+
+	return &userHandler{
+		service:   service,
+		config:    config,
+		awsClient: awsClient,
+	}
 }
 
 type listUsersRequest struct {
@@ -190,4 +206,37 @@ func (h *userHandler) Update(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(responseOK("Success Update", data))
+}
+
+type uploadIDRequest struct {
+	File *multipart.FileHeader `form:"file"`
+}
+
+// UploadIDCard implements UserHandler.
+func (h *userHandler) UploadIDCard(ctx *gin.Context) {
+	// Retrieve the file from the request
+	var req uploadIDRequest
+	if err := ctx.ShouldBindWith(&req, binding.FormMultipart); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	filename := utils.RandomFileName(req.File)
+
+	// Save the file to the server
+	err := ctx.SaveUploadedFile(req.File, utils.DIRECTORY_UPLOADS+"/"+filename)
+	if err != nil {
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	uploadedFile, err := h.awsClient.Upload(ctx, req.File, "id-cards")
+	if err != nil {
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("Success", gin.H{
+		"uploaded_file": uploadedFile,
+	}))
 }

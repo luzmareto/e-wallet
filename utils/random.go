@@ -3,12 +3,22 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"mime/multipart"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
 
+const (
+	DIRECTORY_REPORTS = "tmp/reports"
+	DIRECTORY_UPLOADS = "tmp/uploads"
+)
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
+	os.MkdirAll(DIRECTORY_REPORTS, os.ModePerm)
+	os.MkdirAll(DIRECTORY_UPLOADS, os.ModePerm)
 }
 
 func RandomInt(min int64, max int64) int64 {
@@ -44,4 +54,10 @@ func RandomCurrency() string {
 
 func RandomEmail() string {
 	return fmt.Sprintf("%s@email.com", RandomString(6))
+}
+
+func RandomFileName(file *multipart.FileHeader) string {
+	fileName := filepath.Base(file.Filename)
+	fileNameWithoutExt := fileName[:len(fileName)-len(filepath.Ext(fileName))]
+	return fmt.Sprintf("%s-%d-%s", fileNameWithoutExt, time.Now().UnixNano(), RandomString(8)+filepath.Ext(file.Filename))
 }
