@@ -88,6 +88,11 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 		return
 	}
 
+	if user.IDCard == "" {
+		ctx.JSON(responseForbidden("you should upload your ID to create a wallet"))
+		return
+	}
+
 	arg := db.CreateWalletsParams{
 		UserID:   int32(user.ID),
 		Balance:  req.Balance,

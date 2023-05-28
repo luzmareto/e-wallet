@@ -99,6 +99,14 @@ func responseUnauthorized(message string) (int, webResponse) {
 	}
 }
 
+func responseForbidden(message string) (int, webResponse) {
+	return http.StatusForbidden, webResponse{
+		Code:    http.StatusForbidden,
+		Status:  "Forbidden",
+		Message: message,
+	}
+}
+
 const (
 	ROLE_ADMIN  = "admin"
 	ROLE_USER   = "user"
