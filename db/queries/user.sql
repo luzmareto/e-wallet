@@ -25,3 +25,6 @@ SELECT * FROM users WHERE username = $1;
 
 -- name: ListUsers :many
 SELECT * FROM users ORDER BY id LIMIT $1 OFFSET $2;
+
+-- name: UpdateUserIDcard :exec
+UPDATE users SET id_card = $2 WHERE id = $1;

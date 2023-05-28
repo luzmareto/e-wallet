@@ -127,36 +127,7 @@ func (s *service) MerchantPaymentTransactions(ctx context.Context, arg db.Create
 	return s.store.MerchantPaymentTransactions(ctx, arg, merchantID)
 }
 
-// WalletHistory implements Service.
-func (s *service) WalletHistory(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams) (db.WalletHistoryResult, error) {
-	var result db.WalletHistoryResult
-	var err error
-	_, err = s.store.GetWalletById(ctx, int64(arg.WalletID))
-	if err != nil {
-		cstErr := &utils.CustomError{
-			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
-			Err: err,
-		}
-		return result, cstErr
-	}
-
-	_, err = s.store.GetUserById(ctx, int64(arg.UserID))
-	if err != nil {
-		cstErr := &utils.CustomError{
-			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
-			Err: err,
-		}
-		return result, cstErr
-	}
-
-	result, err = s.store.WalletHistory(ctx, arg)
-	if err != nil {
-		cstErr := &utils.CustomError{
-			Msg: "failed to get wallet history",
-			Err: err,
-		}
-		return result, cstErr
-	}
-	GenerateCSVWalletHistory(result.Transactions, result.Transfers)
-	return result, err
+// WalletHistoryGenerateCSV implements Service.
+func (s *service) WalletHistoryGenerateCSV(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams) (db.WalletHistoryResult, error) {
+	panic("Unimplemented")
 }

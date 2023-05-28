@@ -37,6 +37,7 @@ type Querier interface {
 	ListMerchants(ctx context.Context, arg ListMerchantsParams) ([]Merchant, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdatMerchants(ctx context.Context, arg UpdatMerchantsParams) (Merchant, error)
+	UpdateUserIDcard(ctx context.Context, arg UpdateUserIDcardParams) error
 	UpdateUsers(ctx context.Context, arg UpdateUsersParams) (User, error)
 	UpdateUsersPassword(ctx context.Context, arg UpdateUsersPasswordParams) error
 }

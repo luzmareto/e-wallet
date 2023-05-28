@@ -19,7 +19,7 @@ type Store interface {
 	TopupTransactions(ctx context.Context, arg CreateTopUpsParams) (TopupResult, error)
 	WithdrawalTransactions(ctx context.Context, arg CreateWithdrawalsParams) (WithdrawalResult, error)
 	MerchantPaymentTransactions(ctx context.Context, arg CreateTransactionParams, merchantID int64) error
-	WalletHistory(ctx context.Context, arg GetTransactionWalletByidAndUserIDParams) (WalletHistoryResult, error)
+	WalletHistoryGenerateCSV(ctx context.Context, arg GetTransactionWalletByidAndUserIDParams) (WalletHistoryResult, error)
 }
 
 type sqlStore struct {
@@ -240,7 +240,7 @@ type WalletHistoryResult struct {
 }
 
 // WalletHistory implements Store.
-func (store *sqlStore) WalletHistory(ctx context.Context, arg GetTransactionWalletByidAndUserIDParams) (WalletHistoryResult, error) {
+func (store *sqlStore) WalletHistoryGenerateCSV(ctx context.Context, arg GetTransactionWalletByidAndUserIDParams) (WalletHistoryResult, error) {
 	var result WalletHistoryResult
 	var err error
 	result.Transactions, err = store.GetTransactionWalletByidAndUserID(ctx, arg)

@@ -41,7 +41,7 @@ func (server *Server) setupRouter() {
 	svc := service.New(dbconn)
 
 	// initialte handler
-	userHander := handler.NewUserHandler(svc)
+	userHander := handler.NewUserHandler(svc, server.config)
 	authHander := handler.NewAUthHandler(server.config, server.tokenMaker, svc)
 	walletHandler := handler.NewWalletHandler(svc)
 	storeHandler := handler.NewStoreHandler(svc)
@@ -68,11 +68,13 @@ func (server *Server) setupRouter() {
 	router.POST("/token/renew", h.AuthHandler.RenewAccessToken)
 
 	// user router
+	router.MaxMultipartMemory = 10 << 20
 	user := router.Group("/api/v1/users", middleware.AuthMiddleware(server.tokenMaker))
 	{
 		user.GET("/", h.UserHandler.List)
 		user.GET("/:id", h.UserHandler.GetByID)
 		user.GET("/detail", h.UserHandler.GetByUsername)
+		user.POST("/upload-id", h.UserHandler.UploadIDCard)
 		user.PATCH("/", h.UserHandler.Update)
 	}
 
@@ -85,7 +87,7 @@ func (server *Server) setupRouter() {
 		wallet.POST("/topups", h.StoreHandler.TopupTransactions)
 		wallet.POST("/transfer", h.StoreHandler.TransferTransactions)
 		wallet.POST("/payment/merchant", h.StoreHandler.MerchantPaymentTransactions)
-		wallet.GET("/history/:wallet_id", h.StoreHandler.WalletHistory)
+		wallet.GET("/history", h.StoreHandler.WalletHistory)
 	}
 
 	merchant := router.Group("/api/v1/merchants", middleware.AuthMiddleware(server.tokenMaker))
