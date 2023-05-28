@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"mime/multipart"
 
@@ -50,6 +51,23 @@ func NewAWSS3Client(env Config) AWSS3Client {
 func (awsClient *awsS3Client) Upload(ctx context.Context, file *multipart.FileHeader, folder string) (uploadedFile string, errUpload error) {
 	// Generate a random file name
 	filename := RandomFileName(file)
+
+	mime, err := GetMIMEType(file)
+	if err != nil {
+		errUpload = &CustomError{
+			Err: sql.ErrConnDone,
+			Msg: fmt.Sprintf("invalid file mimetype %s", mime),
+		}
+		return
+	}
+
+	if !IsAllowedFileType(mime) {
+		errUpload = &CustomError{
+			Err: sql.ErrConnDone,
+			Msg: fmt.Sprintf("unsuported file mimetype %s, only jpg, jpeg or png ", mime),
+		}
+		return
+	}
 
 	f, errUpload := file.Open()
 	if errUpload != nil {

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"encoding/csv"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 
 type Service interface {
 	db.Store
+	WalletHistory(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams, historyType string) (pathCSV string, err error)
 }
 
 type service struct {
@@ -28,14 +30,12 @@ func New(sqlDB *sql.DB) Service {
 	}
 }
 
-func GenerateCSVWalletHistory(transactions []db.Transaction, transfer []db.Transfer) (string, string, error) {
-	directory := utils.DIRECTORY_REPORTS
-
-	trxFilename := fmt.Sprintf("%s/history_transactions_wallet_%d.csv", directory, transactions[0].WalletID)
-	tfFilename := fmt.Sprintf("%s/history_transfer_wallet_%d.csv", directory, transactions[0].WalletID)
+func GenerateCSVWalletHistory(directory string, transactions []db.Transaction, transfer []db.Transfer) (trxFilename string, tfFilename string, err error) {
+	trxFilename = fmt.Sprintf("%s/history_transactions_wallet_%d.csv", directory, transactions[0].WalletID)
+	tfFilename = fmt.Sprintf("%s/history_transfer_wallet_%d.csv", directory, transactions[0].WalletID)
 
 	// Create the directory if it doesn't exist
-	err := os.MkdirAll(directory, os.ModePerm)
+	err = os.MkdirAll(directory, os.ModePerm)
 
 	if err != nil {
 		return trxFilename, tfFilename, err
@@ -111,4 +111,60 @@ func GenerateCSVWalletHistory(transactions []db.Transaction, transfer []db.Trans
 	}
 
 	return trxFilename, tfFilename, err
+}
+
+// WalletHistory implements Service.
+func (s *service) WalletHistory(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams, historyType string) (pathCSV string, err error) {
+	_, err = s.store.GetWalletById(ctx, int64(arg.WalletID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+			Err: err,
+		}
+		err = cstErr
+		return
+	}
+
+	_, err = s.store.GetUserById(ctx, int64(arg.UserID))
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+			Err: err,
+		}
+		err = cstErr
+		return
+	}
+
+	result, err := s.store.WalletHistoryGenerateCSV(ctx, arg)
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: "failed to get wallet history",
+			Err: err,
+		}
+		err = cstErr
+		return
+	}
+
+	// define tmp directory
+	directory := utils.DIRECTORY_REPORTS
+
+	trx, tf, err := GenerateCSVWalletHistory(directory, result.Transactions, result.Transfers)
+	_, _ = trx, tf
+
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: "failed to get generate csv file",
+			Err: err,
+		}
+		err = cstErr
+		return
+	}
+
+	if historyType == "transactions" {
+		pathCSV = trx
+	}
+	if historyType == "transfers" {
+		pathCSV = tf
+	}
+	return
 }

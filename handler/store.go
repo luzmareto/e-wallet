@@ -2,6 +2,8 @@ package handler
 
 import (
 	"database/sql"
+	"fmt"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
@@ -250,7 +252,8 @@ func (h *storeHandler) MerchantPaymentTransactions(ctx *gin.Context) {
 }
 
 type walletHistoryRequest struct {
-	WalletID int32 `uri:"wallet_id" binding:"required,min=1"`
+	WalletID int32  `form:"wallet_id" binding:"required,min=1"`
+	Type     string `form:"type" binding:"required,oneof='transfers' 'transactions'"`
 }
 
 // WalletHistory implements StoreHandler.
@@ -273,15 +276,18 @@ func (h *storeHandler) WalletHistory(ctx *gin.Context) {
 
 	var req walletHistoryRequest
 
-	if err := ctx.ShouldBindUri(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 
-	data, err := h.service.WalletHistory(ctx, db.GetTransactionWalletByidAndUserIDParams{
+	pathcsv, err := h.service.WalletHistory(ctx, db.GetTransactionWalletByidAndUserIDParams{
 		WalletID: req.WalletID,
 		UserID:   int32(user.ID),
-	})
+	}, req.Type)
+
+	defer os.RemoveAll(pathcsv)
+
 	if err != nil {
 		newErr := err.(*utils.CustomError)
 		if newErr.Err == sql.ErrNoRows {
@@ -297,6 +303,16 @@ func (h *storeHandler) WalletHistory(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(responseOK("Success", data))
+	// Set the necessary headers for file download
+	ctx.Header("Content-Description", "File Transfer")
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s.csv", req.Type))
+	ctx.Header("Content-Type", "text/csv")
+	ctx.Header("Content-Transfer-Encoding", "binary")
+	ctx.Header("Cache-Control", "no-cache")
+
+	fmt.Println(pathcsv)
+	ctx.File(pathcsv)
+
+	// ctx.JSON(responseOK("Success", pathcsv))
 
 }

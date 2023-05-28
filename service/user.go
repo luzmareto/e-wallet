@@ -85,3 +85,15 @@ func (s *service) UpdateUsersPassword(ctx context.Context, arg db.UpdateUsersPas
 	}
 	return s.store.UpdateUsersPassword(ctx, arg)
 }
+
+// UpdateUserIDcard implements Service.
+func (s *service) UpdateUserIDcard(ctx context.Context, arg db.UpdateUserIDcardParams) error {
+	if _, err := s.store.GetUserById(ctx, arg.ID); err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("user with id %d not found", arg.ID),
+			Err: err,
+		}
+		return cstErr
+	}
+	return s.store.UpdateUserIDcard(ctx, arg)
+}

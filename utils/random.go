@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	DIRECTORY_REPORTS = "tmp/reports"
-	DIRECTORY_UPLOADS = "tmp/uploads"
+	DIRECTORY_REPORTS = "tmp/uploads/reports"
+	DIRECTORY_UPLOADS = "tmp/uploads/id-cards"
 )
 
 func init() {

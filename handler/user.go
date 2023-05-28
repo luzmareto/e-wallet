@@ -214,6 +214,23 @@ type uploadIDRequest struct {
 
 // UploadIDCard implements UserHandler.
 func (h *userHandler) UploadIDCard(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	newErr := utils.CastError(err)
+
+	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
 	// Retrieve the file from the request
 	var req uploadIDRequest
 	if err := ctx.ShouldBindWith(&req, binding.FormMultipart); err != nil {
@@ -221,22 +238,30 @@ func (h *userHandler) UploadIDCard(ctx *gin.Context) {
 		return
 	}
 
-	filename := utils.RandomFileName(req.File)
-
-	// Save the file to the server
-	err := ctx.SaveUploadedFile(req.File, utils.DIRECTORY_UPLOADS+"/"+filename)
-	if err != nil {
-		ctx.JSON(responseInternalServerError(err.Error()))
-		return
-	}
-
 	uploadedFile, err := h.awsClient.Upload(ctx, req.File, "id-cards")
 	if err != nil {
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrConnDone {
+			ctx.JSON(responseBadRequest(newErr.Msg))
+			return
+		}
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
 
-	ctx.JSON(responseOK("Success", gin.H{
-		"uploaded_file": uploadedFile,
-	}))
+	// Save the file to the server
+	if err := ctx.SaveUploadedFile(req.File, utils.DIRECTORY_UPLOADS+"/"+uploadedFile); err != nil {
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	if err := h.service.UpdateUserIDcard(ctx, db.UpdateUserIDcardParams{
+		ID:     user.ID,
+		IDCard: uploadedFile,
+	}); err != nil {
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("Success"))
 }

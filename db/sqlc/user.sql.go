@@ -138,6 +138,20 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 	return items, nil
 }
 
+const updateUserIDcard = `-- name: UpdateUserIDcard :exec
+UPDATE users SET id_card = $2 WHERE id = $1
+`
+
+type UpdateUserIDcardParams struct {
+	ID     int64  `json:"id"`
+	IDCard string `json:"id_card"`
+}
+
+func (q *Queries) UpdateUserIDcard(ctx context.Context, arg UpdateUserIDcardParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserIDcard, arg.ID, arg.IDCard)
+	return err
+}
+
 const updateUsers = `-- name: UpdateUsers :one
 UPDATE users SET email = $2, phone_number = $3 WHERE id = $1 RETURNINg id, role, username, password, email, phone_number, id_card, registration_date
 `
