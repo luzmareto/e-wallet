@@ -310,9 +310,5 @@ func (h *storeHandler) WalletHistory(ctx *gin.Context) {
 	ctx.Header("Content-Transfer-Encoding", "binary")
 	ctx.Header("Cache-Control", "no-cache")
 
-	fmt.Println(pathcsv)
 	ctx.File(pathcsv)
-
-	// ctx.JSON(responseOK("Success", pathcsv))
-
 }
