@@ -75,6 +75,7 @@ func (server *Server) setupRouter() {
 		user.GET("/:id", h.UserHandler.GetByID)
 		user.GET("/detail", h.UserHandler.GetByUsername)
 		user.POST("/upload-id", h.UserHandler.UploadIDCard)
+		user.PATCH("/update-password", h.UserHandler.UpdatePassword)
 		user.PATCH("/", h.UserHandler.Update)
 	}
 

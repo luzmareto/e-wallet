@@ -19,6 +19,7 @@ type UserHandler interface {
 	GetByID(ctx *gin.Context)
 	List(ctx *gin.Context)
 	Update(ctx *gin.Context)
+	UpdatePassword(ctx *gin.Context)
 	UploadIDCard(ctx *gin.Context)
 }
 
@@ -259,6 +260,62 @@ func (h *userHandler) UploadIDCard(ctx *gin.Context) {
 		ID:     user.ID,
 		IDCard: uploadedFile,
 	}); err != nil {
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("Success"))
+}
+
+type updatePasswordRequest struct {
+	CurrentPassword string `json:"current_password" binding:"required"`
+	NewPassword     string `json:"new_password" binding:"required,min=8"`
+}
+
+// UpdatePassword implements UserHandler.
+func (h *userHandler) UpdatePassword(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	newErr := utils.CastError(err)
+
+	if err != nil {
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	var req updatePasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	if err := utils.CheckPassword(req.CurrentPassword, user.Password); err != nil {
+		ctx.JSON(responseUnauthorized("your current password is wrong"))
+		return
+	}
+	var hashed string
+	if hashed, err = utils.HashPassword(req.NewPassword); err != nil {
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	if err := h.service.UpdateUsersPassword(ctx, db.UpdateUsersPasswordParams{
+		ID:       user.ID,
+		Password: hashed,
+	}); err != nil {
+		if err == sql.ErrNoRows {
+			newErr := utils.CastError(err)
+			ctx.JSON(responseNotFound(newErr.Msg))
+			return
+		}
 		ctx.JSON(responseInternalServerError(err.Error()))
 		return
 	}
