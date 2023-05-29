@@ -14,20 +14,24 @@ import (
 type Service interface {
 	db.Store
 	WalletHistory(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams, historyType string) (pathCSV string, err error)
+	SetStore(store db.Store)
 }
 
 type service struct {
-	store   db.Store
-	queries *db.Queries
-	sqlDB   *sql.DB
+	store db.Store
+	sqlDB *sql.DB
 }
 
 func New(sqlDB *sql.DB) Service {
 	return &service{
-		store:   db.NewStore(sqlDB),
-		queries: db.New(sqlDB),
-		sqlDB:   sqlDB,
+		store: db.NewStore(sqlDB),
+		sqlDB: sqlDB,
 	}
+}
+
+// SetStore sets the store for the service
+func (s *service) SetStore(store db.Store) {
+	s.store = store
 }
 
 func GenerateCSVWalletHistory(directory string, transactions []db.Transaction, transfer []db.Transfer) (trxFilename string, tfFilename string, err error) {
