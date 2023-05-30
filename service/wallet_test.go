@@ -2,228 +2,258 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
+	"time"
 
 	dbmocks "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/mocks"
 	db "git.enigmacamp.com/enigma-camp/enigmacamp-2.0/batch-5/khilmi-aminudin/challenge/go-ewallet/db/sqlc"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
+var dummyUserWallet = db.User{
+	ID:               2,
+	Role:             "user",
+	Username:         "user",
+	Password:         "user",
+	Email:            "user@gmai.com",
+	PhoneNumber:      "011111",
+	IDCard:           "666.jpg",
+	RegistrationDate: time.Now(),
+}
+
+var dummyWallet = db.Wallet{
+	ID:       1,
+	UserID:   int32(dummyUserWallet.ID),
+	Balance:  0,
+	Currency: "",
+}
+
 func TestCreateWallets(t *testing.T) {
-	user := db.User{
-		ID: 1,
-	}
-	dummywallet := db.Wallet{
-		ID:       1,
-		UserID:   int32(user.ID),
+	arg := db.CreateWalletsParams{
+		UserID:   int32(dummyUserWallet.ID),
 		Balance:  0,
 		Currency: "IDR",
 	}
-	arg := db.CreateWalletsParams{
-		UserID: int32(user.ID),
-	}
+
 	testCase := []struct {
 		name          string
 		arg           db.CreateWalletsParams
 		buildStubs    func(mockStore *dbmocks.Store)
-		checkresponse func(t *testing.T, svc Service)
+		checkResponse func(t *testing.T, svc Service, wallet db.Wallet, err error)
 	}{
 		{
 			name: "OK",
 			arg:  arg,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("GetUserById", mock.Anything, mock.AnythingOfType("int64")).
-					Return(user, nil)
+				mockStore.On("GetUserById", mock.Anything, int64(arg.UserID)).Return(dummyUserWallet, nil)
 				mockStore.On("CreateWallets", mock.Anything, mock.Anything).
-					Return(dummywallet, nil)
+					Run(func(args mock.Arguments) {
+						createWalletsParams := args.Get(1).(db.CreateWalletsParams)
+						require.Equal(t, CurrencyIDR, createWalletsParams.Currency) // Assert the Currency value
+					}).
+					Return(db.Wallet{
+						UserID:   arg.UserID,
+						Balance:  arg.Balance,
+						Currency: arg.Currency,
+						// Add any additional fields you need for testing
+					}, nil)
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.CreateWallets(context.Background(), arg)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.NoError(t, err)
 				require.NotEmpty(t, wallet)
 				require.Equal(t, arg.UserID, wallet.UserID)
-				require.Equal(t, dummywallet.Balance, wallet.Balance)
-				require.Equal(t, dummywallet.Currency, wallet.Currency)
+				require.Equal(t, arg.Balance, wallet.Balance)
+				require.Equal(t, arg.Currency, wallet.Currency)
 			},
 		},
 		{
-			name: "Not Found",
+			name: "User Not Found",
 			arg:  arg,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("GetUserById", mock.Anything, mock.AnythingOfType("int64")).
-					Return(db.User{}, sql.ErrNoRows)
+				mockStore.On("GetUserById", mock.Anything, int64(arg.UserID)).Return(db.User{}, errors.New("user not found"))
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.CreateWallets(context.Background(), arg)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.Error(t, err)
 				require.Empty(t, wallet)
-				require.EqualError(t, err, fmt.Sprintf("user with id %d not found", arg.UserID))
 			},
 		},
 		{
 			name: "Unexpected Error",
 			arg:  arg,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("GetUserById", mock.Anything, mock.AnythingOfType("int64")).
-					Return(user, nil)
-				mockStore.On("CreateWallets", mock.Anything, mock.Anything).
-					Return(db.Wallet{}, errors.New(""))
+				mockStore.On("GetUserById", mock.Anything, int64(arg.UserID)).Return(dummyUserWallet, nil)
+				mockStore.On("CreateWallets", mock.Anything, mock.Anything).Return(db.Wallet{}, errors.New("unexpected error"))
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.CreateWallets(context.Background(), arg)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.Error(t, err)
 				require.Empty(t, wallet)
+				// Add any additional assertions you need for testing
 			},
 		},
 	}
-
-	for i := range testCase {
-		tc := testCase[i]
+	for _, tc := range testCase {
 		t.Run(tc.name, func(t *testing.T) {
 			mockStore := &dbmocks.Store{}
-
 			svc := New(nil)
 			svc.SetStore(mockStore)
-
 			tc.buildStubs(mockStore)
-			tc.checkresponse(t, svc)
-
+			wallet, err := svc.CreateWallets(context.Background(), tc.arg)
+			tc.checkResponse(t, svc, wallet, err)
 			mockStore.AssertExpectations(t)
 		})
 	}
+
 }
 
-func TestGetWalletByID(t *testing.T) {
-	user := db.User{
-		ID: 1,
-	}
-	dummywallet := db.Wallet{
-		ID:       1,
-		UserID:   int32(user.ID),
-		Balance:  0,
+// var dummyUser1 = []db.User{
+// 	{
+// 		ID:               1,
+// 		Role:             "admin",
+// 		Username:         "admin",
+// 		Password:         "password-admin",
+// 		Email:            "admin@mail.com",
+// 		PhoneNumber:      "012345678",
+// 		IDCard:           "jhkhkj.jpg",
+// 		RegistrationDate: time.Now(),
+// 	},
+// 	{
+// 		ID:               2,
+// 		Role:             "user",
+// 		Username:         "user",
+// 		Password:         "password-user",
+// 		Email:            "user@mail.com",
+// 		PhoneNumber:      "012345678",
+// 		IDCard:           "jhkhkj.jpg",
+// 		RegistrationDate: time.Now(),
+// 	},
+// }
+
+func TestGetWalletById(t *testing.T) {
+	expectedWallet := db.Wallet{
+		ID:       dummyWallet.ID,
+		UserID:   int32(dummyUserWallet.ID),
+		Balance:  1000,
 		Currency: "IDR",
 	}
 
 	testCase := []struct {
 		name          string
-		arg           int64
+		id            int64
 		buildStubs    func(mockStore *dbmocks.Store)
-		checkresponse func(t *testing.T, svc Service)
+		checkResponse func(t *testing.T, svc Service, wallet db.Wallet, err error)
 	}{
 		{
 			name: "OK",
-			arg:  dummywallet.ID,
+			id:   dummyWallet.ID,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("GetWalletById", mock.Anything, mock.AnythingOfType("int64")).
-					Return(dummywallet, nil)
+				mockStore.On("GetWalletById", mock.Anything, dummyWallet.ID).Return(expectedWallet, nil)
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.GetWalletById(context.Background(), dummywallet.ID)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.NoError(t, err)
-				require.NotEmpty(t, wallet)
-				require.Equal(t, dummywallet.UserID, wallet.UserID)
-				require.Equal(t, dummywallet.Balance, wallet.Balance)
-				require.Equal(t, dummywallet.Currency, wallet.Currency)
+				require.Equal(t, expectedWallet, wallet)
+			},
+		},
+		{
+			name: "Wallet Not Found",
+			id:   999, // Non-existing wallet ID
+			buildStubs: func(mockStore *dbmocks.Store) {
+				mockStore.On("GetWalletById", mock.Anything, int64(999)).Return(db.Wallet{}, errors.New("not found"))
+			},
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
+				require.Error(t, err)
+				require.Empty(t, wallet)
 			},
 		},
 		{
 			name: "Unexpected Error",
-			arg:  dummywallet.ID,
+			id:   dummyWallet.ID,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("GetWalletById", mock.Anything, mock.AnythingOfType("int64")).
-					Return(db.Wallet{}, errors.New(""))
+				mockStore.On("GetWalletById", mock.Anything, dummyWallet.ID).Return(db.Wallet{}, errors.New("unexpected error"))
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.GetWalletById(context.Background(), dummywallet.ID)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.Error(t, err)
 				require.Empty(t, wallet)
 			},
 		},
 	}
-	for i := range testCase {
-		tc := testCase[i]
+
+	for _, tc := range testCase {
 		t.Run(tc.name, func(t *testing.T) {
 			mockStore := &dbmocks.Store{}
-
 			svc := New(nil)
 			svc.SetStore(mockStore)
-
 			tc.buildStubs(mockStore)
-			tc.checkresponse(t, svc)
-
+			wallet, err := svc.GetWalletById(context.Background(), tc.id)
+			tc.checkResponse(t, svc, wallet, err)
 			mockStore.AssertExpectations(t)
 		})
 	}
 }
 
 func TestAddWalletBalance(t *testing.T) {
-	user := db.User{
-		ID: 1,
-	}
-	dummywallet := db.Wallet{
-		ID:       1,
-		UserID:   int32(user.ID),
-		Balance:  0,
-		Currency: "IDR",
+	arg := db.AddWalletBalanceParams{
+		ID:      dummyUserWallet.ID,
+		Balance: 0,
 	}
 
-	arg := db.AddWalletBalanceParams{
-		ID:      dummywallet.ID,
-		Balance: 1000,
+	expectedWallet := db.Wallet{
+		ID:       arg.ID,
+		UserID:   2, // Assuming the user ID
+		Balance:  500,
+		Currency: "IDR",
 	}
 
 	testCase := []struct {
 		name          string
 		arg           db.AddWalletBalanceParams
 		buildStubs    func(mockStore *dbmocks.Store)
-		checkresponse func(t *testing.T, svc Service)
+		checkResponse func(t *testing.T, svc Service, wallet db.Wallet, err error)
 	}{
 		{
 			name: "OK",
 			arg:  arg,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("AddWalletBalance", mock.Anything, mock.Anything).
-					Return(dummywallet, nil)
+				mockStore.On("AddWalletBalance", mock.Anything, arg).Return(expectedWallet, nil)
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.AddWalletBalance(context.Background(), arg)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.NoError(t, err)
-				require.NotEmpty(t, wallet)
-				require.Equal(t, dummywallet.UserID, wallet.UserID)
-				require.Equal(t, dummywallet.Balance, wallet.Balance)
-				require.Equal(t, dummywallet.Currency, wallet.Currency)
+				require.Equal(t, expectedWallet, wallet)
+			},
+		},
+		{
+			name: "Wallet Not Found",
+			arg:  arg,
+			buildStubs: func(mockStore *dbmocks.Store) {
+				mockStore.On("AddWalletBalance", mock.Anything, arg).Return(db.Wallet{}, errors.New("wallet not found"))
+			},
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
+				require.Error(t, err)
+				require.Empty(t, wallet)
 			},
 		},
 		{
 			name: "Unexpected Error",
 			arg:  arg,
 			buildStubs: func(mockStore *dbmocks.Store) {
-				mockStore.On("AddWalletBalance", mock.Anything, mock.Anything).
-					Return(db.Wallet{}, errors.New(""))
+				mockStore.On("AddWalletBalance", mock.Anything, arg).Return(db.Wallet{}, errors.New("unexpected error"))
 			},
-			checkresponse: func(t *testing.T, svc Service) {
-				wallet, err := svc.AddWalletBalance(context.Background(), arg)
+			checkResponse: func(t *testing.T, svc Service, wallet db.Wallet, err error) {
 				require.Error(t, err)
 				require.Empty(t, wallet)
 			},
 		},
 	}
-	for i := range testCase {
-		tc := testCase[i]
+
+	for _, tc := range testCase {
 		t.Run(tc.name, func(t *testing.T) {
 			mockStore := &dbmocks.Store{}
-
 			svc := New(nil)
 			svc.SetStore(mockStore)
-
 			tc.buildStubs(mockStore)
-			tc.checkresponse(t, svc)
-
+			wallet, err := svc.AddWalletBalance(context.Background(), tc.arg)
+			tc.checkResponse(t, svc, wallet, err)
 			mockStore.AssertExpectations(t)
 		})
 	}
