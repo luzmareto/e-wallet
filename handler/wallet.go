@@ -116,17 +116,41 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 
 // CreateWallets implements WalletHandler
 func (h *walletHandler) GetWalletByID(ctx *gin.Context) {
+	payload, err := middleware.GetPayload(ctx)
+	if err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	user, err := h.service.GetUserByUserName(ctx, payload.Username)
+	if err != nil {
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
 	var reqId walletIdRequest
 	if err := ctx.ShouldBindUri(&reqId); err != nil {
 		ctx.JSON(responseBadRequest(err.Error()))
 		return
 	}
 
-	data, err := h.service.GetWalletById(ctx, reqId.ID)
+	data, err := h.service.GetWalletByIdAndUserId(ctx, db.GetWalletByIdAndUserIdParams{
+		ID:     reqId.ID,
+		UserID: int32(user.ID),
+	})
 	if err != nil {
 		newErr := utils.CastError(err)
 		if newErr.Err == sql.ErrNoRows {
 			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		if newErr.Err == sql.ErrConnDone {
+			ctx.JSON(responseUnauthorized(err.Error()))
 			return
 		}
 		ctx.JSON(responseInternalServerError(err.Error()))

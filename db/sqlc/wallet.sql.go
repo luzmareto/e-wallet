@@ -75,3 +75,26 @@ func (q *Queries) GetWalletById(ctx context.Context, id int64) (Wallet, error) {
 	)
 	return i, err
 }
+
+const getWalletByIdAndUserId = `-- name: GetWalletByIdAndUserId :one
+SELECT id, user_id, balance, currency FROM wallets 
+WHERE id = $1 
+AND user_id = $2
+`
+
+type GetWalletByIdAndUserIdParams struct {
+	ID     int64 `json:"id"`
+	UserID int32 `json:"user_id"`
+}
+
+func (q *Queries) GetWalletByIdAndUserId(ctx context.Context, arg GetWalletByIdAndUserIdParams) (Wallet, error) {
+	row := q.db.QueryRowContext(ctx, getWalletByIdAndUserId, arg.ID, arg.UserID)
+	var i Wallet
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Balance,
+		&i.Currency,
+	)
+	return i, err
+}

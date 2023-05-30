@@ -34,6 +34,7 @@ type Querier interface {
 	GetUserById(ctx context.Context, id int64) (User, error)
 	GetUserByUserName(ctx context.Context, username string) (User, error)
 	GetWalletById(ctx context.Context, id int64) (Wallet, error)
+	GetWalletByIdAndUserId(ctx context.Context, arg GetWalletByIdAndUserIdParams) (Wallet, error)
 	ListMerchants(ctx context.Context, arg ListMerchantsParams) ([]Merchant, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdatMerchants(ctx context.Context, arg UpdatMerchantsParams) (Merchant, error)

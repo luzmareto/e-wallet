@@ -14,3 +14,9 @@ WHERE id = $1 RETURNINg *;
 
 -- name: GetWalletById :one
 SELECT * FROM wallets WHERE id = $1;
+
+
+-- name: GetWalletByIdAndUserId :one
+SELECT * FROM wallets 
+WHERE id = $1 
+AND user_id = $2;
