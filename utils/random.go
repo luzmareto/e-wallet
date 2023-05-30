@@ -61,3 +61,8 @@ func RandomFileName(file *multipart.FileHeader) string {
 	fileNameWithoutExt := fileName[:len(fileName)-len(filepath.Ext(fileName))]
 	return fmt.Sprintf("%s-%d-%s", fileNameWithoutExt, time.Now().UnixNano(), RandomString(8)+filepath.Ext(file.Filename))
 }
+
+func RandomTransactionTypes() string {
+	var trxType = []string{"TRANSFER", "TOPUP", "WITHDRAWAL", "PAYMENT"}
+	return trxType[rand.Intn(len(trxType))]
+}

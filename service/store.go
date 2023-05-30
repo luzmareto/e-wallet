@@ -12,11 +12,14 @@ import (
 // Topup implements Service.
 func (s *service) TopupTransactions(ctx context.Context, arg db.CreateTopUpsParams) (db.TopupResult, error) {
 	if _, err := s.store.GetWalletById(ctx, int64(arg.WalletID)); err != nil {
-		cstErr := &utils.CustomError{
-			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
-			Err: err,
+		if err == sql.ErrNoRows {
+			cstErr := &utils.CustomError{
+				Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+				Err: err,
+			}
+			return db.TopupResult{}, cstErr
 		}
-		return db.TopupResult{}, cstErr
+		return db.TopupResult{}, err
 	}
 	return s.store.TopupTransactions(ctx, arg)
 }
@@ -111,11 +114,14 @@ func (s *service) TransferTransactions(ctx context.Context, arg db.CreateTransfe
 func (s *service) MerchantPaymentTransactions(ctx context.Context, arg db.CreateTransactionParams, merchantID int64) error {
 	wallet, err := s.store.GetWalletById(ctx, int64(arg.WalletID))
 	if err != nil {
-		cstErr := &utils.CustomError{
-			Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
-			Err: err,
+		if err == sql.ErrNoRows {
+			cstErr := &utils.CustomError{
+				Msg: fmt.Sprintf("wallet with id %d not found", arg.WalletID),
+				Err: err,
+			}
+			return cstErr
 		}
-		return cstErr
+		return err
 	}
 	if wallet.Balance < arg.Amount {
 		cstErr := &utils.CustomError{
@@ -129,5 +135,5 @@ func (s *service) MerchantPaymentTransactions(ctx context.Context, arg db.Create
 
 // WalletHistoryGenerateCSV implements Service.
 func (s *service) WalletHistoryGenerateCSV(ctx context.Context, arg db.GetTransactionWalletByidAndUserIDParams) (db.WalletHistoryResult, error) {
-	panic("Unimplemented")
+	return s.store.WalletHistoryGenerateCSV(ctx, arg)
 }
