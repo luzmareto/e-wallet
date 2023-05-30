@@ -34,10 +34,10 @@ sqlc :
 	sqlc generate
 
 db_docs:
-	dbdocs build doc/db.dbml
+	dbdocs build docs/db.dbml
 
 db_schema:
-	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
 
 test :
 	go test -v -cover ./...
@@ -45,7 +45,10 @@ test :
 runserver :
 	go run cmd/main.go
 
+build:
+	docker build -t ewallet .
+
 mock :
-	mockgen -package mockdb -destination db/mock/store.go github.com/khilmi-aminudin/ewalletv1/db/sqlc Store
+	mockery --name=Store --dir=db/sqlc --output=db/mocks --outpkg=dbmocks
 
 .PHONY : postgresql execdb createdb initmigrate migrateup migratedown migrateup1 migratedown1 sqlc db_docs db_schema test runserver mock

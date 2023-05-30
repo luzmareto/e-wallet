@@ -1,0 +1,104 @@
+
+Table "users" {
+    "id" BIGSERIAL [pk, increment]
+    "role" VARCHAR(10) [not null, default: "user"]
+    "username" VARCHAR(255) [unique, not null]
+    "password" VARCHAR(255) [not null]
+    "email" VARCHAR(255) [not null]
+    "phone_number" VARCHAR(20) [not null]
+    "id_card" VARCHAR(255) [not null, default: `''`]
+    "registration_date" timestamptz [not null, default: "NOW()"]
+}
+
+Table "wallets" {
+    "id" BIGSERIAL [pk, increment]
+    "user_id" INT [not null]
+    "balance" "NUMERIC(10, 2)" [not null]
+    "currency" VARCHAR(10) [not null]
+}
+
+Table "transactions" {
+    "id" BIGSERIAL [pk, increment]
+    "user_id" INT [not null]
+    "wallet_id" INT [not null]
+    "amount" "NUMERIC(10, 2)" [not null]
+    "transaction_date" timestamptz [not null, default: "NOW()"]
+    "transaction_type" VARCHAR(10) [not null]
+    "description" VARCHAR(255) [not null]
+}
+
+Table "transfers" {
+    "id" BIGSERIAL [pk, increment]
+    "from_wallet_id" INT [not null]
+    "to_wallet_id" INT [not null]
+    "amount" "NUMERIC(10, 2)" [not null]
+    "transfer_date" timestamptz [not null, default: "NOW()"]
+    "description" VARCHAR(255) [not null, default: `''`]
+}
+
+Table "topups" {
+    "id" BIGSERIAL [pk, increment]
+    "user_id" INT [not null]
+    "wallet_id" INT [not null]
+    "amount" "NUMERIC(10, 2)" [not null]
+    "topup_date" timestamptz [not null, default: "NOW()"]
+    "description" VARCHAR(255) [not null, default: `''`]
+}
+
+Table "withdrawals" {
+    "id" BIGSERIAL [pk, increment]
+    "user_id" INT [not null]
+    "wallet_id" INT [not null]
+    "amount" "NUMERIC(10, 2)" [not null]
+    "withdrawal_date" timestamptz [not null, default: "NOW()"]
+    "description" VARCHAR(255) [not null, default: `''`]
+}
+
+Table "merchants" {
+    "id" BIGSERIAL [pk, increment]
+    "merchant_name" VARCHAR(255) [not null]
+    "description" VARCHAR(255) [not null, default: `''`]
+    "website" VARCHAR(255) [not null, default: `''`]
+    "address" VARCHAR(255) [not null, default: `''`]
+    "balance" "NUMERIC(10, 2)" [not null, default: 0]
+}
+
+Table "transaction_merchants" {
+    "transaction_id" INT
+    "merchant_id" INT
+}
+
+Table "sessions" {
+    "id" uuid [pk]
+    "username" varchar [not null]
+    "refresh_token" varchar [not null]
+    "user_agent" varchar [not null]
+    "client_ip" varchar [not null]
+    "is_blocked" boolean [not null, default: false]
+    "expired_at" timestamptz [not null]
+    "created_at" timestamptz [not null, default: "NOW()"]
+}
+
+Ref:"users"."username" < "sessions"."username"
+
+Ref:"users"."id" < "wallets"."user_id"
+
+Ref:"users"."id" < "transactions"."user_id"
+
+Ref:"wallets"."id" < "transactions"."wallet_id"
+
+Ref:"wallets"."id" < "transfers"."from_wallet_id"
+
+Ref:"wallets"."id" < "transfers"."to_wallet_id"
+
+Ref:"users"."id" < "topups"."user_id"
+
+Ref:"wallets"."id" < "topups"."wallet_id"
+
+Ref:"users"."id" < "withdrawals"."user_id"
+
+Ref:"wallets"."id" < "withdrawals"."wallet_id"
+
+Ref:"transactions"."id" < "transaction_merchants"."transaction_id"
+
+Ref:"merchants"."id" < "transaction_merchants"."merchant_id"
