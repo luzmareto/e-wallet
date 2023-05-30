@@ -67,7 +67,7 @@ func (s *service) GetMerchantsByMerchantsName(ctx context.Context, merchantName 
 func (s *service) ListMerchants(ctx context.Context, arg db.ListMerchantsParams) ([]db.Merchant, error) {
 	merchants, err := s.store.ListMerchants(ctx, arg)
 	if err != nil {
-		return nil, err
+		return merchants, err
 	}
 	return merchants, nil
 
@@ -80,7 +80,7 @@ func (s *service) UpdatMerchants(ctx context.Context, arg db.UpdatMerchantsParam
 	merchant, err := s.store.UpdatMerchants(ctx, arg)
 	if err != nil {
 		cstErr := &utils.CustomError{
-			Msg: fmt.Sprintf("user with id %d not found", arg.ID),
+			Msg: fmt.Sprintf("merchant with id %d not found", arg.ID),
 			Err: err,
 		}
 		return merchant, cstErr
