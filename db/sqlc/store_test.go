@@ -32,3 +32,67 @@ func TestTransferTransactions(t *testing.T) {
 	require.Equal(t, int64(arg.ToWalletID), result.ToWallet.ID)
 
 }
+
+func TestMerchantPaymentTransactions(t *testing.T) {
+	user := createRandomUser(t)
+	wallet := createRandomWallets(t)
+	merchant := createRandomMerchants(t)
+
+	arg := CreateTransactionParams{
+		UserID:          int32(user.ID),
+		WalletID:        int32(wallet.ID),
+		Amount:          10000,
+		Description:     utils.RandomString(100),
+		TransactionType: "PAYMENT",
+	}
+
+	err := testStore.MerchantPaymentTransactions(context.Background(), arg, merchant.ID)
+	require.NoError(t, err)
+
+}
+
+func TestTopupTransactions(t *testing.T) {
+	user := createRandomUser(t)
+	wallet := createRandomWallets(t)
+	arg := CreateTopUpsParams{
+		UserID:      int32(user.ID),
+		WalletID:    int32(wallet.ID),
+		Amount:      10000,
+		Description: utils.RandomString(100),
+	}
+	result, err := testStore.TopupTransactions(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+	require.NotEmpty(t, result.Topup)
+	require.NotEmpty(t, result.Wallet)
+}
+
+func TestWithdrawalTransactions(t *testing.T) {
+	user := createRandomUser(t)
+	wallet := createRandomWallets(t)
+	arg := CreateWithdrawalsParams{
+		UserID:      int32(user.ID),
+		WalletID:    int32(wallet.ID),
+		Amount:      10000,
+		Description: utils.RandomString(100),
+	}
+
+	result, err := testStore.WithdrawalTransactions(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+	require.NotEmpty(t, result.Wallet)
+	require.NotEmpty(t, result.Withdrawal)
+}
+
+func TestWalletHistoryGenerateCSV(t *testing.T) {
+	user := createRandomUser(t)
+	wallet := createRandomWallets(t)
+	arg := GetTransactionWalletByidAndUserIDParams{
+		WalletID: int32(wallet.ID),
+		UserID:   int32(user.ID),
+	}
+
+	result, err := testStore.WalletHistoryGenerateCSV(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
+}
