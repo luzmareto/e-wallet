@@ -31,7 +31,15 @@ func (s *service) CreateWallets(ctx context.Context, arg db.CreateWalletsParams)
 
 // GetWalletById implements Service.
 func (s *service) GetWalletById(ctx context.Context, id int64) (db.Wallet, error) {
-	return s.store.GetWalletById(ctx, id)
+	wallet, err := s.store.GetWalletById(ctx, id)
+	if err != nil {
+		cstErr := &utils.CustomError{
+			Msg: fmt.Sprintf("wallet with id %d not found", id),
+			Err: err,
+		}
+		return db.Wallet{}, cstErr
+	}
+	return wallet, nil
 }
 
 // AddWalletBalance implements Service

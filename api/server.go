@@ -82,6 +82,7 @@ func (server *Server) setupRouter() {
 	// wallet route
 	wallet := router.Group("/api/v1/wallets", middleware.AuthMiddleware(server.tokenMaker))
 	{
+		wallet.GET("/:id", h.WalletHandler.GetWalletByID)
 		wallet.POST("/:id", h.WalletHandler.AddWalletBalance)
 		wallet.POST("/", h.WalletHandler.CreateWallets)
 		wallet.POST("/withdrawal", h.StoreHandler.WithdrawalTransactions)

@@ -14,6 +14,7 @@ import (
 type WalletHandler interface {
 	AddWalletBalance(ctx *gin.Context)
 	CreateWallets(ctx *gin.Context)
+	GetWalletByID(ctx *gin.Context)
 }
 
 type walletHandler struct {
@@ -110,5 +111,28 @@ func (h *walletHandler) CreateWallets(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(responseCreated("Success Created", data))
+
+}
+
+// CreateWallets implements WalletHandler
+func (h *walletHandler) GetWalletByID(ctx *gin.Context) {
+	var reqId walletIdRequest
+	if err := ctx.ShouldBindUri(&reqId); err != nil {
+		ctx.JSON(responseBadRequest(err.Error()))
+		return
+	}
+
+	data, err := h.service.GetWalletById(ctx, reqId.ID)
+	if err != nil {
+		newErr := utils.CastError(err)
+		if newErr.Err == sql.ErrNoRows {
+			ctx.JSON(responseNotFound(err.Error()))
+			return
+		}
+		ctx.JSON(responseInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(responseOK("Success", data))
 
 }
